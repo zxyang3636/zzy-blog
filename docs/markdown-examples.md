@@ -43,6 +43,10 @@ d
 ![](./public/logo.png)
 ![](https://images.pexels.com/photos/106118/pexels-photo-106118.jpeg)
 
+## 视频引用
+
+<!-- <xgplayer url="./public/iBXUuTy6.mp4" poster="./public/logo.png" /> -->
+
 ## 链接
 
 **Input**
@@ -77,15 +81,54 @@ d
 
 > Emoji 大全：https://www.emojiall.com/zh-hans/
 
-## 代码组图标
+## 代码带标题
 
-## Syntax Highlighting
+_input_
 
-VitePress provides Syntax Highlighting powered by [Shiki](https://github.com/shikijs/shiki), with additional features like line-highlighting:
+````md
+```c [HelloWorld.c]
+#include <stdio.h>
 
-```sh
+int main(){
+
+  printf("Hello World !!!");
+
+  return 0;
+}
+```
+````
+
+```c [HelloWorld.c]
+#include <stdio.h>
+
+int main(){
+
+  printf("Hello World !!!");
+
+  return 0;
+}
+
+```
+
+## 代码组带图标
+
+**input**
+
+````md
+::: code-group
+
+```sh [pnpm]
+#查询pnpm版本
 pnpm -v
 ```
+
+```sh [yarn]
+#查询yarn版本
+yarn -v
+```
+
+:::
+````
 
 ::: code-group
 

@@ -38,8 +38,8 @@ export const nav: DefaultTheme.Config["nav"] = [
   {
     text: "其他",
     items: [
+      { text: "网址导航", link: "/guide/server/daoHang" },
       { text: "软件分享", link: "/preface" },
-      { text: "网址导航", link: "/configuration" },
       { text: "常用工具", link: "/configuration" },
       { text: "VitePress部署", link: "/configuration" },
     ],

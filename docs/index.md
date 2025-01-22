@@ -35,6 +35,5 @@ features:
     linkText: Show
 ---
 
-<HomeUnderline />
-<update />
-<Mycomponent />
+<!-- <HomeUnderline /> -->
+<!-- <update /> -->

@@ -51,6 +51,6 @@ onMounted(() => {
         />
       </svg>
     </span>
-    <!-- {{ fm.hero.image?.alt }} -->
+    {{ fm.hero.image?.alt }}
   </div>
 </template>

@@ -108,7 +108,10 @@ export default defineConfig({
       {
         //分组标题
         text: "其他",
-        items: [{ text: "Markdown示例页", link: "/markdown-examples" }],
+        items: [
+          { text: "网址导航", link: "/guide/server/daoHang" },
+          { text: "Markdown示例页", link: "/markdown-examples" },
+        ],
       },
     ],
     socialLinks: [
