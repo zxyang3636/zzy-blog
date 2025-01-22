@@ -14,6 +14,7 @@ import MNavLinks from "./components/MNavLinks.vue";
 
 export default {
   extends: DefaultTheme,
+  // ...DefaultTheme, //或者这样写也可
   Layout: () => {
     const props: Record<string, any> = {};
     // 获取 frontmatter
@@ -24,25 +25,8 @@ export default {
       props.class = frontmatter.value.layoutClass;
     }
 
-    return h(DefaultTheme.Layout, props);
+    return h(MyLayout, props);
   },
-  // Layout() {
-  //   return h(MyLayout);
-  // },
-  // Layout() {
-  //   const props: Record<string, any> = {};
-  //   // 获取 frontmatter
-  //   const { frontmatter } = useData();
-
-  //   /* 添加自定义 class */
-  //   if (frontmatter.value?.layoutClass) {
-  //     props.class = frontmatter.value.layoutClass;
-  //   }
-
-  //   // 默认使用 MyLayout
-  //   return h(MyLayout, props);
-  // },
-  // ...DefaultTheme, //或者这样写也可
   enhanceApp({ app }) {
     // 注册全局组件
     app.component("HomeUnderline", HomeUnderline);
