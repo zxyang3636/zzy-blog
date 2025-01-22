@@ -109,6 +109,22 @@ int main(){
 }
 
 ```
+## 折叠语法
+**Input**
+````md
+
+<details>
+  <summary>点我展开</summary>
+  Markdown默认折叠语法，Vitepress可以使用容器折叠语法，更加美观
+</details>
+
+
+````
+**Output**
+<details>
+  <summary>点我展开</summary>
+  Markdown默认折叠语法，Vitepress可以使用容器折叠语法，更加美观
+</details>
 
 ## 代码组带图标
 

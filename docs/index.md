@@ -5,7 +5,7 @@ layout: home
 hero:
   name: "Coding"
   text: "分享与记录科技生活"
-  tagline: "由VitePress搭建     from zzyang"
+  tagline: "使用VitePress搭建      _zzyang"
   image:
     src: /logo.png
     alt: VitePress

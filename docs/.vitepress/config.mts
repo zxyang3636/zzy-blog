@@ -29,7 +29,7 @@ export default defineConfig({
   },
   cleanUrls: true, //开启纯净链接
   lang: "zh-CN", //语言，可选 en-US
-  title: "Zzy-Blog",
+  title: "zzy-blog",
   description: "zzy的记录文档、coding",
   //fav图标
   head: [["link", { rel: "icon", href: "/logo.png" }]],
