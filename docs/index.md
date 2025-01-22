@@ -34,3 +34,7 @@ features:
     link: ../markdown-examples.md
     linkText: Show
 ---
+
+<HomeUnderline />
+<update />
+<Mycomponent />

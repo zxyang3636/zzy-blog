@@ -1,11 +1,27 @@
 import { defineConfig } from "vitepress";
 import { nav } from "./configs";
+import {
+  groupIconMdPlugin,
+  groupIconVitePlugin,
+} from "vitepress-plugin-group-icons";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   lastUpdated: true, //首次配置不会立即生效，需git提交后爬取时间戳
   markdown: {
+    config(md) {
+      md.use(groupIconMdPlugin); //代码组图标
+    },
     lineNumbers: true, // 代码快行数显示
+    image: {
+      // 开启图片懒加载
+      lazyLoading: true,
+    },
+  },
+  vite: {
+    plugins: [
+      groupIconVitePlugin(), //代码组图标
+    ],
   },
   // 站点地图
   sitemap: {
@@ -32,7 +48,7 @@ export default defineConfig({
   },
   themeConfig: {
     outline: {
-      level: [2, 4], // 显示2-4级标题
+      level: [1, 6], // 显示2-4级标题
       // level: 'deep', // 显示2-6级标题
       label: "当前页大纲", // 文字显示
     },
