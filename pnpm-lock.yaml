@@ -11,12 +11,21 @@ importers:
       '@mdit-vue/shared':
         specifier: ^2.1.3
         version: 2.1.3
+      canvas-confetti:
+        specifier: ^1.9.3
+        version: 1.9.3
       medium-zoom:
         specifier: ^1.1.0
         version: 1.1.0
+      nprogress-v2:
+        specifier: ^1.0.4
+        version: 1.0.4
       vitepress:
         specifier: ^1.6.1
         version: 1.6.1(@algolia/client-search@5.19.0)(postcss@8.5.1)(search-insights@2.17.3)
+      vitepress-plugin-comment-with-giscus:
+        specifier: ^1.1.15
+        version: 1.1.15(vue@3.5.13)
       vitepress-plugin-group-icons:
         specifier: ^1.3.5
         version: 1.3.5
@@ -285,6 +294,11 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@giscus/vue@2.4.0':
+    resolution: {integrity: sha512-QOxKHgsMT91myyQagP2v20YYAei1ByZuc3qcaYxbHx4AwOeyVrybDIuRFwG9YDv6OraC86jYnU4Ixd37ddC/0A==}
+    peerDependencies:
+      vue: '>=3.2.0'
+
   '@iconify-json/logos@1.2.4':
     resolution: {integrity: sha512-XC4If5D/hbaZvUkTV8iaZuGlQCyG6CNOlaAaJaGa13V5QMYwYjgtKk3vPP8wz3wtTVNVEVk3LRx1fOJz+YnSMw==}
 
@@ -302,6 +316,12 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
+
+  '@lit-labs/ssr-dom-shim@1.3.0':
+    resolution: {integrity: sha512-nQIWonJ6eFAvUUrSlwyHDm/aE8PBDu5kRpL0vHMg6K8fK3Diq1xdPjTnsJSwxABhaZ+5eBi1btQB5ShUTKo4nQ==}
+
+  '@lit/reactive-element@2.0.4':
+    resolution: {integrity: sha512-GFn91inaUa2oHLak8awSIigYz0cU0Payr1rcFsrkf5OJ5eSPxElyZfKh0f2p9FsTiZWXQdWGJeXZICEfXXYSXQ==}
 
   '@mdit-vue/shared@2.1.3':
     resolution: {integrity: sha512-27YI8b0VVZsAlNwaWoaOCWbr4eL8B04HxiYk/y2ktblO/nMcOEOLt4p0RjuobvdyUyjHvGOS09RKhq7qHm1CHQ==}
@@ -456,6 +476,9 @@ packages:
   '@types/mdurl@2.0.0':
     resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
 
+  '@types/trusted-types@2.0.7':
+    resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
+
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
@@ -579,6 +602,9 @@ packages:
   birpc@0.2.19:
     resolution: {integrity: sha512-5WeXXAvTmitV1RqJFppT5QtUiz2p1mRSYU000Jkft5ZUCLJIk4uQriYNO50HknxKwM6jd8utNc66K1qGIwwWBQ==}
 
+  canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
+
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
 
@@ -685,6 +711,9 @@ packages:
   generate-source-map@0.0.5:
     resolution: {integrity: sha512-jqiE7f3FEaeMcjnMSEYLjMa39bdx+RrrdfhxdJpMm9S/8IugHF4vLQLZ9sxHylWyxpsBILukC/l/7B0/O0zhNg==}
 
+  giscus@1.6.0:
+    resolution: {integrity: sha512-Zrsi8r4t1LVW950keaWcsURuZUQwUaMKjvJgTCY125vkW6OiEBkatE7ScJDbpqKHdZwb///7FVC21SE3iFK3PQ==}
+
   globals@15.14.0:
     resolution: {integrity: sha512-OkToC372DtlQeje9/zHIo5CT8lRP/FUgEOKBEhU4e0abL7J7CD24fD9ohiLN5hagG/kWCYj4K5oaxxtj2Z0Dig==}
     engines: {node: '>=18'}
@@ -710,6 +739,15 @@ packages:
 
   linkify-it@5.0.0:
     resolution: {integrity: sha512-5aHCbzQRADcdP+ATqnDuhhJ/MRIqDkZX5pyjFHRRysS8vZ5AbqGEoFIb6pYHPZ+L/OC2Lc+xT8uHVVR5CAK/wQ==}
+
+  lit-element@4.1.1:
+    resolution: {integrity: sha512-HO9Tkkh34QkTeUmEdNYhMT8hzLid7YlMlATSi1q4q17HE5d9mrrEHJ/o8O2D0cMi182zK1F3v7x0PWFjrhXFew==}
+
+  lit-html@3.2.1:
+    resolution: {integrity: sha512-qI/3lziaPMSKsrwlxH/xMgikhQ0EGOX2ICU73Bi/YHFvz2j/yMCIrw4+puF2IpQ4+upd3EWbvnHM9+PnJn48YA==}
+
+  lit@3.2.1:
+    resolution: {integrity: sha512-1BBa1E/z0O9ye5fZprPtdqnc0BFzxIxTTOO/tQFmyC/hj1O3jL4TfmLBw0WEwjAokdLwpclkvGgDJwTIh0/22w==}
 
   local-pkg@0.5.1:
     resolution: {integrity: sha512-9rrA30MRRP3gBD3HTGnC6cDFpaE1kVDWxWgqWJUN0RvDNAo+Nz/9GxB+nHOH0ifbVFy0hSA1V6vFDvnx54lTEQ==}
@@ -768,6 +806,9 @@ packages:
 
   next-tick@1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
+
+  nprogress-v2@1.0.4:
+    resolution: {integrity: sha512-HPhTEgqsQMFXXuaftvu6bevqEXvcQ/hogvkAswlcNyS9eRGjvo7wZY1O4H3aZS4Uq8oWSO6sL3dOj6Oq/ZJN5A==}
 
   oniguruma-to-es@2.2.0:
     resolution: {integrity: sha512-EEsso27ri0sf+t4uRFEj5C5gvXQj0d0w1Y2qq06b+hDLBnvzO1rWTwEW4C7ytan6nhg4WPwE26eLoiPhHUbvKg==}
@@ -915,6 +956,9 @@ packages:
         optional: true
       terser:
         optional: true
+
+  vitepress-plugin-comment-with-giscus@1.1.15:
+    resolution: {integrity: sha512-1DJjgN+7SYvn5ZkjuSXPmz7nlqfcrh4qCGGviiZghA2ELXnaO2m9WY7m+RisPSaqCn90xqe0JbO2T4NMq8iUBg==}
 
   vitepress-plugin-group-icons@1.3.5:
     resolution: {integrity: sha512-1f1NP7osRYlNTR0yS5CAqcaasKHRSAzFKpeCUOfCPwYLAFxhCxsEbRtPBm0U1CfrDVa303MsjX18ngGpFGxIMA==}
@@ -1169,6 +1213,11 @@ snapshots:
   '@esbuild/win32-x64@0.21.5':
     optional: true
 
+  '@giscus/vue@2.4.0(vue@3.5.13)':
+    dependencies:
+      giscus: 1.6.0
+      vue: 3.5.13
+
   '@iconify-json/logos@1.2.4':
     dependencies:
       '@iconify/types': 2.0.0
@@ -1197,6 +1246,12 @@ snapshots:
       - supports-color
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
+
+  '@lit-labs/ssr-dom-shim@1.3.0': {}
+
+  '@lit/reactive-element@2.0.4':
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.3.0
 
   '@mdit-vue/shared@2.1.3':
     dependencies:
@@ -1321,6 +1376,8 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/mdurl@2.0.0': {}
+
+  '@types/trusted-types@2.0.7': {}
 
   '@types/unist@3.0.3': {}
 
@@ -1456,6 +1513,8 @@ snapshots:
 
   birpc@0.2.19: {}
 
+  canvas-confetti@1.9.3: {}
+
   ccount@2.0.1: {}
 
   character-entities-html4@2.1.0: {}
@@ -1577,6 +1636,10 @@ snapshots:
       esprima: 1.2.5
       source-map: 0.1.43
 
+  giscus@1.6.0:
+    dependencies:
+      lit: 3.2.1
+
   globals@15.14.0: {}
 
   hast-util-to-html@9.0.4:
@@ -1608,6 +1671,22 @@ snapshots:
   linkify-it@5.0.0:
     dependencies:
       uc.micro: 2.1.0
+
+  lit-element@4.1.1:
+    dependencies:
+      '@lit-labs/ssr-dom-shim': 1.3.0
+      '@lit/reactive-element': 2.0.4
+      lit-html: 3.2.1
+
+  lit-html@3.2.1:
+    dependencies:
+      '@types/trusted-types': 2.0.7
+
+  lit@3.2.1:
+    dependencies:
+      '@lit/reactive-element': 2.0.4
+      lit-element: 4.1.1
+      lit-html: 3.2.1
 
   local-pkg@0.5.1:
     dependencies:
@@ -1678,6 +1757,8 @@ snapshots:
   nanoid@3.3.8: {}
 
   next-tick@1.1.0: {}
+
+  nprogress-v2@1.0.4: {}
 
   oniguruma-to-es@2.2.0:
     dependencies:
@@ -1833,6 +1914,12 @@ snapshots:
       rollup: 4.31.0
     optionalDependencies:
       fsevents: 2.3.3
+
+  vitepress-plugin-comment-with-giscus@1.1.15(vue@3.5.13):
+    dependencies:
+      '@giscus/vue': 2.4.0(vue@3.5.13)
+    transitivePeerDependencies:
+      - vue
 
   vitepress-plugin-group-icons@1.3.5:
     dependencies:

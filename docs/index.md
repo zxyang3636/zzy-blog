@@ -35,5 +35,6 @@ features:
     linkText: Show
 ---
 
+<confetti />
 <!-- <HomeUnderline /> -->
 <!-- <update /> -->

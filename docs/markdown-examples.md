@@ -45,6 +45,8 @@ d
 
 ## 视频引用
 
+<video src="./public/U7zAVzZOzwxIfjc.mp4" controls="controls"></video>
+
 <!-- <xgplayer url="./public/iBXUuTy6.mp4" poster="./public/logo.png" /> -->
 
 ## 链接
@@ -109,18 +111,20 @@ int main(){
 }
 
 ```
-## 折叠语法
-**Input**
-````md
 
+## 折叠语法
+
+**Input**
+
+```md
 <details>
   <summary>点我展开</summary>
   Markdown默认折叠语法，Vitepress可以使用容器折叠语法，更加美观
 </details>
+```
 
-
-````
 **Output**
+
 <details>
   <summary>点我展开</summary>
   Markdown默认折叠语法，Vitepress可以使用容器折叠语法，更加美观
