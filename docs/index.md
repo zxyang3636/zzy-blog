@@ -18,19 +18,19 @@ hero:
       link: /api-examples
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-    icon: 👨‍💻
-    link: https://vitejs.cn/
-    linkText: Vite
+  - title: 实用网址集锦
+    details: 精心整理了的一份实用网址的清单,旨在为您的学习、工作和生活增添便利。
+    icon: 🌐
+    link: ./guide/server/daoHang
+    linkText: visit
   - title: VitePress搭建
     details: 详细的VitePress静态网站搭建教程
-    icon: 🧭
+    icon: 👨🏻‍💻
     link: https://vitepress.yiov.top/
     linkText: Start immediately
   - title: Markdown 示例页
     details: 展示不同各种展现形式
-    icon: 🏞️
+    icon: 🖹
     link: ../markdown-examples.md
     linkText: Show
 ---
