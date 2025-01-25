@@ -60,7 +60,7 @@ export default defineConfig({
         timeStyle: "medium", // 可选值full、long、medium、short
       },
     },
-    logo: "./logo.png",
+    logo: "./logo.png", // 左上角logo
     //本地搜索
     search: {
       provider: "local",

@@ -7,7 +7,7 @@ hero:
   text: "分享与记录科技生活"
   tagline: "使用VitePress搭建      _zzyang"
   image:
-    src: /logo.png
+    src: ./管理技术487392058734.png
     alt: VitePress
   actions:
     - theme: brand
