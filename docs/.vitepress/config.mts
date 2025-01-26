@@ -91,13 +91,13 @@ export default defineConfig({
         //分组标题
         text: "后端",
         items: [
+          { text: "Websocket", link: "/guide/server/websocket" },
+          { text: "SSE(Server-Sent Events)", link: "/guide/server/sse" },
           // { text: "前言", link: "/preface" },
           // { text: "快速上手", link: "/getting-started" },
           // { text: "配置", link: "/configuration" },
           // { text: "页面", link: "/page" },
           // { text: "Frontmatter", link: "/frontmatter" },
-          // { text: "Markdown", link: "/markdown" },
-          { text: "Websocket", link: "/guide/server/websocket" },
         ],
       },
       {

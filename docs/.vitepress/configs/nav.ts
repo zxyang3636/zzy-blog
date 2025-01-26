@@ -10,7 +10,10 @@ export const nav: DefaultTheme.Config["nav"] = [
       {
         // 分组标题1
         text: "其他",
-        items: [{ text: "Websocket", link: "/guide/server/websocket" }],
+        items: [
+          { text: "Websocket", link: "/guide/server/websocket" },
+          { text: "SSE", link: "/guide/server/sse" },
+        ],
       },
     ],
   },
