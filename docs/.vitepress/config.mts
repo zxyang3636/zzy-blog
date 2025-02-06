@@ -25,7 +25,7 @@ export default defineConfig({
   },
   // 站点地图
   sitemap: {
-    hostname: "域名",
+    hostname: "www.zzyang.top",
   },
   cleanUrls: true, //开启纯净链接
   lang: "zh-CN", //语言，可选 en-US
@@ -129,7 +129,8 @@ export default defineConfig({
     //页脚
     footer: {
       message: "Released under the MIT License.",
-      copyright: "Copyright © 2021-2025 present ZhangZiYang",
+      // message: `<a href="https://beian.miit.gov.cn/" target="_blank">黑ICP备2025035182号</a>`,
+      copyright: `<a href="https://beian.miit.gov.cn/" target="_blank">黑ICP备2025035182号-1</a> Copyright © 2024-${new Date().getFullYear()} 备案号：<a href="https://beian.mps.gov.cn/#/query/webSearch?code=23012702000012" target="_blank">黑公网安备23012702000012号</a>`,
       // 自动更新时间
       //copyright: `Copyright © 2019-${new Date().getFullYear()} present Evan You`,
     },
