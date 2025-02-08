@@ -75,7 +75,9 @@ provide("toggle-appearance", async ({ clientX: x, clientY: y }: MouseEvent) => {
 }
 /* 修正因视图过渡导致的按钮图标偏移 */
 .check .icon {
-  top: 1px;
-  left: 0px;
+  top: 3%;
+  left: 1%;
+  /* top: 1px;
+  left: 0px; */
 }
 </style>
