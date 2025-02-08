@@ -25,7 +25,7 @@ export default defineConfig({
   },
   // 站点地图
   sitemap: {
-    hostname: "www.zzyang.top",
+    hostname: "https://www.zzyang.top",
   },
   cleanUrls: true, //开启纯净链接
   lang: "zh-CN", //语言，可选 en-US
