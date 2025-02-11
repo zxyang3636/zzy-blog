@@ -102,8 +102,11 @@ export default defineConfig({
       },
       {
         //分组标题
-        text: "面试",
-        items: [{ text: "面试指北", link: "/guide/server/mianshi" }],
+        text: "面试指北",
+        items: [
+          { text: "Java", link: "/guide/server/mianshi" },
+          { text: "MySql", link: "/guide/server/" },
+        ],
       },
       {
         //分组标题

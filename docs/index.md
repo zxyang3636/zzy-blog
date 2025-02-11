@@ -12,7 +12,7 @@ hero:
   actions:
     - theme: brand
       text: Java 快速开始
-      link: /markdown-examples
+      link: ./guide/server/mianshi
     - theme: alt
       text: API 示例
       link: /api-examples
