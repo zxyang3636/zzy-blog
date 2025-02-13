@@ -42,7 +42,7 @@ export const nav: DefaultTheme.Config["nav"] = [
     text: "面试指北",
     items: [
       { text: "Java", link: "/guide/server/mianshi" },
-      { text: "MySql", link: "/guide/server/" },
+      { text: "MySql", link: "/guide/server/mysqlMianshi" },
     ],
   },
   {
