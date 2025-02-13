@@ -170,3 +170,104 @@ public class SseController {
 }
 
 ```
+
+## 实现方式 3
+
+```java
+package com.example.ssedemo.controller;
+
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+@RestController
+@RequestMapping("/sse")
+public class SseController {
+
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamEvents() {
+        // 创建一个 SseEmitter 实例，设置超时时间为 0（永不超时）
+        SseEmitter emitter = new SseEmitter(0L);
+
+        // 异步发送事件
+        executor.execute(() -> {
+            try {
+                for (int i = 1; i <= 10; i++) {
+                    // 模拟每秒发送一次数据
+                    Thread.sleep(1000);
+                    emitter.send(SseEmitter.event()
+                            .id(String.valueOf(i))
+                            .name("message")
+                            .data("Event " + i));
+                }
+                // 完成事件流
+                emitter.complete();
+            } catch (IOException | InterruptedException e) {
+                emitter.completeWithError(e);
+            }
+        });
+
+        return emitter;
+    }
+}
+```
+
+```vue
+<template>
+  <div>
+    <h1>Server-Sent Events (SSE) Demo</h1>
+    <button @click="startSSE">Start SSE</button>
+    <ul>
+      <li v-for="(event, index) in events" :key="index">{{ event }}</li>
+    </ul>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+
+// 定义响应式变量
+const events = ref<string[]>([]);
+let eventSource: EventSource | null = null;
+
+// 启动 SSE 连接
+const startSSE = () => {
+  if (eventSource) {
+    eventSource.close(); // 如果已经有连接，先关闭
+  }
+
+  // 创建 EventSource 连接到后端 SSE 端点
+  eventSource = new EventSource('http://localhost:8080/sse/stream');
+
+  // 监听消息事件
+  eventSource.addEventListener('message', (event: MessageEvent) => {
+    console.log('Received event:', event.data);
+    events.value.push(event.data); // 将接收到的消息添加到列表中
+  });
+
+  // 监听错误事件
+  eventSource.onerror = (error: Event) => {
+    console.error('EventSource failed:', error);
+    eventSource?.close(); // 关闭连接
+  };
+};
+</script>
+
+<style scoped>
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  margin: 5px 0;
+}
+</style>
+```

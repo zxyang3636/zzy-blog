@@ -90,10 +90,11 @@ export default defineConfig({
       {
         //分组标题
         text: "后端",
+        collapsed: false,
         items: [
+          { text: "Java线程池", link: "/guide/server/javaThreadPool" },
           { text: "Websocket", link: "/guide/server/websocket" },
           { text: "SSE(Server-Sent Events)", link: "/guide/server/sse" },
-          // { text: "前言", link: "/preface" },
           // { text: "快速上手", link: "/getting-started" },
           // { text: "配置", link: "/configuration" },
           // { text: "页面", link: "/page" },
@@ -103,6 +104,7 @@ export default defineConfig({
       {
         //分组标题
         text: "面试指北",
+        collapsed: false,
         items: [
           { text: "Java", link: "/guide/server/mianshi" },
           { text: "MySql", link: "/guide/server/mysqlMianshi" },
