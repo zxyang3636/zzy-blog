@@ -208,6 +208,280 @@ public class Main {
 一共有12个这样的方法，去掉重载方法后，就剩下6个
 ![](../../public/img/sadfkjl4598982.png)
 
+---
 
+### FixedThreadPool
+
+![](../../public/img/weqoru23948.png)
+
+FixedThreadPool，它内部采用 `ThreadPoolExecutor`来创建线程池，核心线程数和最大线程数一样，意味着它里面全是核心线程；空闲线程存活时间为0毫秒，这样空闲线程就不会被销毁，任务队列采用的是 `LinkedBlockingQueue`;
+
+此队列有资源耗尽的风险，因为`LinkedBlockingQueue`的容量为Interger的最大值，Interger的最大值是2<sup>31</sup>，意味着任务队列中的任务数量可高达 21亿之多，内存随时都有可能爆掉，不推荐使用 `FixedThreadPool`;
+![](../../public/img/230498gjwlwjg.png)
+
+在《阿里巴巴Java开发手册》的第一章第7小节，第4条中这样写道⤵️
 
 ![](../../public/img/asdl;fkj23947.png)
+
+创建固定大小的线程池有两个方法⤵️
+![](../../public/img/0239481975069172.png)
+演示一个参数的方法：
+
+```java [Task.java]
+public class Task implements Runnable {
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName());
+    }
+}
+```
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 创建任务
+        Runnable task1 = new Task();
+        Runnable task2 = new Task();
+        Runnable task3 = new Task();
+        // 创建线程池
+        ExecutorService threadPoolExecutor = Executors.newFixedThreadPool(10);
+        // 提交任务
+        threadPoolExecutor.execute(task1);
+        threadPoolExecutor.execute(task2);
+        threadPoolExecutor.execute(task3);
+        // 关闭线程池
+        threadPoolExecutor.shutdown();
+    }
+```
+*运行结果*
+![](../../public/img/1239085710238.png)
+
+---
+
+### SingleThreadExecutor
+
+它内部也采用 `ThreadPoolExecutor`来创建线程池，核心线程数和最大线程数一样，意味着它里面全也都是核心线程，只不过只有一个，空闲线程存活时间为0毫秒，它里面的空闲线程也不会被销毁，任务队列采用的是 `LinkedBlockingQueue`，风险和FixedThreadPool一样的问题，不推荐使用 `SingleThreadExecutor`
+![](../../public/img/12398591237591298.png)
+
+方法:
+![](../../public/img/1894012227162210304.png)
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 创建任务
+        Runnable task1 = new Task();
+        Runnable task2 = new Task();
+        Runnable task3 = new Task();
+        // 创建线程池
+        ExecutorService threadPoolExecutor = Executors.newSingleThreadExecutor();
+        // 提交任务
+        threadPoolExecutor.execute(task1);
+        threadPoolExecutor.execute(task2);
+        threadPoolExecutor.execute(task3);
+        // 关闭线程池
+        threadPoolExecutor.shutdown();
+    }
+```
+程序输出三个一样的线程名称，说明线程池中的确只有一个线程
+![](../../public/img/1894013511424540672.png)
+
+---
+
+### CachedThreadPool
+
+![](../../public/img/1894015233911947264.png)
+
+可缓存的线程池，可缓存的意思是，它里面除了核心线程以外，还有非核心线程，他内部也采用了`ThreadPoolExecutor`来创建线程池，核心线程数是0，意味着可缓存的线程池里面全都是非核心线程，最大线程数是 Integer的最大值，风险不言而喻，弊端就不再赘述了，和前面两个线程池的问题一样，不推荐使用 `CachedThreadPool`，空闲线程存活时间为 60 秒，空闲线程 60 秒内没工作就会被销毁，任务队列采用的是 `SynchronousQueue`，这是一个同步队列。
+
+![](../../public/img/1894014879807832064.png)
+
+创建可缓存的线程池有两个方法
+
+![](../../public/img/1894016177919754240.png)
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        // 创建任务
+        Runnable task1 = new Task();
+        Runnable task2 = new Task();
+        Runnable task3 = new Task();
+        // 创建线程池
+        ExecutorService threadPoolExecutor = Executors.newCachedThreadPool();
+        // 提交任务
+        threadPoolExecutor.execute(task1);
+        threadPoolExecutor.execute(task2);
+        threadPoolExecutor.execute(task3);
+        // 关闭线程池
+        threadPoolExecutor.shutdown();
+    }
+```
+程序输出三个不一样的线程名称
+
+![](../../public/img/1894016802153824256.png)
+
+**总结**
+- `FixedThreadPool`:固定大小的线程池
+- `SingleThreadExecutor`:单个线程的线程池
+- `CachedThreadPool`:可缓存的线程池
+- `FixedThreadPool`和`SingleThreadExecutor` 允许的请求队列长度为 `Integer.MAX_VALUE`，可能会堆积大量的请求，从而导致00M。
+- `CachedThreadPool` 允许的创建线程数量为`Integer.MAX_VALUE`可能会创建大量的线程，从而导致 00M。
+
+## execute与submit
+
+### execute
+
+execute位于Executor接口中，作用是向线程池中提交Runnable任务，Runnable是无返回值的任务，也就是它执行完是没有结果返回给你的，所以，execute 只适合提交无返回值的任务，如果你的任务是有返回结果的，那么你就要创建Callable任务，它是一个有返回值的任务，Callable任务执行完，会将任务执行结果封装到 Future 对象中，然后返回给调用者，调用者再通过 Future 对象获取结果。
+
+![](../../public/img/1894019796459061248.png)
+
+```java [Task.java]
+public class Task implements Runnable {
+    @Override
+    public void run() {
+        System.out.println(Thread.currentThread().getName());
+    }
+}
+```
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Runnable task = new Task();
+
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+        threadPool.execute(task);
+
+        threadPool.shutdown();
+    }
+```
+程序只输出了一个线程名称
+
+![](../../public/img/1894020551345700864.png)
+
+
+### submit
+
+![](../../public/img/1894021498507624448.png)
+
+该方法位于 ExecutorService 接口中，一共有三个 submit 方法，他们的作用稍有不同，我将三个方法的作用分别列举出来
+
+![](../../public/img/1894021699037298688.png)
+
+它们的返回值类型都是 Future 类型，而且都带泛型，任务执行结果就封装在 Future 对象里面，Future是一个接口，该接口定义了与任务执行结果相关的功能
+
+![](../../public/img/1894022094186872832.png)
+
+这是 Future 的 UML类图，他一共有5个可用的方法，这5个方法的作用如图所示
+
+![](../../public/img/1894022346788831232.png)
+
+![](../../public/img/1894022599864745984.png)
+
+---
+
+回到submit本身
+
+![](../../public/img/1894022966388195328.png)
+
+第一个方法，它的作用是提交 Runnable 任多，submit 方法也可以提交 Runnable 任务，方法返回一个 Future 对象，都无返回值了，为什么还有返回Future对象呢？因为 Future 除了获取任务执行结果以外，还可以观察任务是否执行完毕，以及取消任务，等等操作，所以，Future 对象你可以选择接收，你也可以选择不接收，我们来演示：
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Runnable task = new Task();
+
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+        // 提交任务
+        Future<?> future = threadPool.submit(task);
+        try {
+            // 获取任务执行结果
+            Object result = future.get();
+            // 输出任务执行结果
+            System.out.println(result);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            // 关闭线程池
+            threadPool.shutdown();
+        }
+    }
+```
+null是我们获取的任务执行结果，因为我们提交的是无返回值任务，所以结果为null，如果我们非要给无返回值任务一个结果，是否可以？那也是可以的，这就是我们要介绍第二个 submit 方法
+
+![](../../public/img/1894024547917627392.png)
+
+第二个方法，它的作用就是提交一个 Runnable 任务给线程池，并且还可以附带一个执行结果，别的任务都是执行完才知道结果，这个 submit 方法是执行任务之前，都已经知道了任务执行结果，所以，它只适用于，执行任务的同时还要附带一个参数的场景，该方法依然是返回一个 Futrue 对象，这个 Futrue 对象里面装的结果，就是我们刚刚传递的第二个参数；示例：
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Runnable task = new Task();
+
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+        // 提交任务
+        Future<String> future = threadPool.submit(task, "任务完成");
+        try {
+            // 获取任务执行结果
+            String result = future.get();
+            // 输出任务执行结果
+            System.out.println(result);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            // 关闭线程池
+            threadPool.shutdown();
+        }
+    }
+```
+![](../../public/img/1894026032231481344.png)
+
+
+再介绍最后一个 submit 方法，它的作用是提交 Callable 任务，也就是有返回值的任务，方法是返回一个 Futrue 对象，示例：
+
+```java [ResultTask.java]
+public class ResultTask implements Callable<Integer> {
+    @Override
+    public Integer call() throws Exception {
+        return 1 + 1;
+    }
+}
+```
+
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        ResultTask task = new ResultTask();
+
+        ExecutorService threadPool = Executors.newSingleThreadExecutor();
+        // 提交任务
+        Future<Integer> future = threadPool.submit(task);
+        try {
+            // 获取任务执行结果
+            Integer result = future.get();
+            // 输出任务执行结果
+            System.out.println(result);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            // 关闭线程池
+            threadPool.shutdown();
+        }
+    }
+```
+符合预期
+![](../../public/img/1894027235220783104.png)
+
+
+### execute与submit 的区别
+
+![](../../public/img/1894027602381766656.png)
+
+**总结**
+
+![](../../public/img/1894027910621167616.png)
