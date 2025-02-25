@@ -93,8 +93,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Java线程池", link: "/guide/server/javaThreadPool" },
-          { text: "Websocket", link: "/guide/server/websocket" },
-          { text: "SSE(Server-Sent Events)", link: "/guide/server/sse" },
+          { text: "消息推送", link: "/guide/server/xiaoxi" },
           // { text: "快速上手", link: "/getting-started" },
           // { text: "配置", link: "/configuration" },
           // { text: "页面", link: "/page" },

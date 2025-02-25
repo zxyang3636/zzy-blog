@@ -11,8 +11,8 @@ export const nav: DefaultTheme.Config["nav"] = [
         // 分组标题1
         text: "其他",
         items: [
-          { text: "Websocket", link: "/guide/server/websocket" },
-          { text: "SSE", link: "/guide/server/sse" },
+          { text: "消息推送", link: "/guide/server/xiaoxi" },
+          { text: "XXL-JOB", link: "/guide/server/xxljob" },
         ],
       },
     ],
@@ -51,7 +51,7 @@ export const nav: DefaultTheme.Config["nav"] = [
       { text: "网址导航", link: "/guide/server/daoHang" },
       // { text: "软件分享", link: "/preface" },
       // { text: "常用工具", link: "/configuration" },
-      { text: "VitePress部署", link: "/configuration" },
+      { text: "联系我", link: "/api-examples" },
     ],
   },
 ];
