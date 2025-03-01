@@ -43,6 +43,7 @@ export const nav: DefaultTheme.Config["nav"] = [
     items: [
       { text: "Java", link: "/guide/server/mianshi" },
       { text: "MySql", link: "/guide/server/mysqlMianshi" },
+      { text: "Spring相关", link: "/guide/server/spring" },
     ],
   },
   {
