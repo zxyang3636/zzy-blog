@@ -566,3 +566,97 @@ id: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 ```
 最终查询结果为：
 id: 2, 6, 10
+
+
+
+## 项目集成xxl-job
+
+引入依赖
+```xml
+<dependency>
+    <groupId>com.xuxueli</groupId>
+    <artifactId>xxl-job-core</artifactId>
+    <version>2.3.1</version>
+</dependency>
+```
+
+在Nacos中或yaml文件中配置
+```yaml
+# 调度中心部署根地址 [选填]：如调度中心集群部署存在多个地址则用逗号分隔。执行器将会使用该地址进行"执行器心跳注册"和"任务结果回调"；为空则关闭自动注册。
+xxl:
+  job:
+    admin:
+      addresses: http://127.0.0.1:8080/xxl-job-admin
+
+# 执行器通讯TOKEN [选填]：非空时启用。
+    accessToken: default_token
+
+# 执行器AppName [选填]：执行器心跳注册分组依据；为空则关闭自动注册。
+    executor:
+      appname: xxl-job-executor-sample 执行器的AppName
+
+# 执行器注册 [选填]：优先使用该配置作为注册地址，为空时使用内嵌服务 ”IP:PORT“ 作为注册地址。从而更灵活地支持容器类型执行器动态IP和动态映射端口问题。
+      address:
+
+# 执行器IP [选填]：默认为空表示自动获取IP，多网卡时可手动设置指定IP，该IP不会绑定Host仅作为通讯实用；地址信息用于 "执行器注册" 和 "调度中心请求并触发任务"。
+      ip: 127.0.0.1
+
+# 执行器端口号 [选填]：小于等于0则自动获取；默认端口为9999，单机部署多个执行器时，注意要配置不同执行器端口。
+      port: 9999
+
+# 执行器运行日志文件存储磁盘路径 [选填] ：需要对该路径拥有读写权限；为空则使用默认路径。
+      logpath: /data/applogs/xxl-job/jobhandler
+
+# 执行器日志文件保存天数 [选填] ： 过期日志自动清理, 限制值大于等于3时生效; 否则, 如-1, 关闭自动清理功能。
+      logretentiondays: 30
+```
+
+添加配置类
+```java
+@Configuration
+public class XxlJobConfig {
+    @Value("${xxl.job.admin.addresses}")
+    private String adminAddresses;
+    @Value("${xxl.job.accessToken}")
+    private String accessToken;
+    @Value("${xxl.job.executor.appname}")
+    private String appname;
+    // @Value("${xxl.job.executor.address}")
+    // private String address;
+    @Value("${xxl.job.executor.ip}")
+    private String ip;
+    @Value("${xxl.job.executor.port}")
+    private int port;
+    @Value("${xxl.job.executor.logpath}")
+    private String logPath;
+    @Value("${xxl.job.executor.logretentiondays}")
+    private int logRetentionDays;
+
+    @Bean
+    public XxlJobSpringExecutor xxlJobExecutor() {
+        XxlJobSpringExecutor xxlJobSpringExecutor = new XxlJobSpringExecutor();
+        xxlJobSpringExecutor.setAdminAddresses(adminAddresses);
+        xxlJobSpringExecutor.setAppname(appname);
+        // xxlJobSpringExecutor.setAddress(address);
+        xxlJobSpringExecutor.setIp(ip);
+        xxlJobSpringExecutor.setPort(port);
+        xxlJobSpringExecutor.setAccessToken(accessToken);
+        xxlJobSpringExecutor.setLogPath(logPath);
+        xxlJobSpringExecutor.setLogRetentionDays(logRetentionDays);
+        return xxlJobSpringExecutor;
+    }
+}
+
+```
+
+添加执行器
+![](../../public/img/Snipaste_2025-03-04_21-40-55.png)
+
+在`OnLine 机器地址`一栏中便可查看，服务注册的机器
+
+
+代码中添加job任务
+![](../../public/img/Snipaste_2025-03-04_21-50-33.png)
+
+调度中心新增任务
+![](../../public/img/Snipaste_2025-03-04_21-47-58.png)

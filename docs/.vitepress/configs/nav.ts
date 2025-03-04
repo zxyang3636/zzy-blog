@@ -52,7 +52,7 @@ export const nav: DefaultTheme.Config["nav"] = [
       { text: "网址导航", link: "/guide/server/daoHang" },
       // { text: "软件分享", link: "/preface" },
       // { text: "常用工具", link: "/configuration" },
-      { text: "联系我", link: "/api-examples" },
+      { text: "ContactMe", link: "/api-examples" },
     ],
   },
 ];
