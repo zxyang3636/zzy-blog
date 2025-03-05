@@ -17,6 +17,12 @@ export const nav: DefaultTheme.Config["nav"] = [
       },
     ],
   },
+  {
+    text: "前端",
+    items: [
+      { text: "Vue3", link: "/guide/client/vue3" },
+    ],
+  },
   // {
   //   text: "前端",
   //   items: [
