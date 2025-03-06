@@ -62,7 +62,7 @@ npm run serve
 
 具体操作如下（点击查看[官方文档](https://cn.vuejs.org/guide/quick-start.html#creating-a-vue-application)）
 
-```powersheel
+```
 ## 1.创建命令
 npm create vue@latest
 
