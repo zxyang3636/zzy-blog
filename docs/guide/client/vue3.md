@@ -132,7 +132,7 @@ npm create vue@latest
 ### Composition API 的优势
 可以用函数的方式，更加优雅的组织代码，让相关功能的代码更加有序的组织在一起。
 
-<img src="../../public/img/1696662249851-db6403a1-acb5-481a-88e0-e1e34d2ef53a.gif" alt="3.gif" style="height:300px;border-radius:10px;float:left;margin-right:20px"  />
+<img src="../../public/img/1696662249851-db6403a1-acb5-481a-88e0-e1e34d2ef53a.gif" alt="3.gif" style="height:300px;border-radius:10px;margin-bottom:20px"  />
 
 <img src="../../public/img/1696662256560-7239b9f9-a770-43c1-9386-6cc12ef1e9c0.gif" alt="4.gif" style="height:300px;border-radius:10px"  />
 
@@ -495,8 +495,102 @@ const showTel = () => {
 </script>
 
 ```
+---
 
 ### computed
 作用：根据已有数据计算出新数据（和`Vue2`中的`computed`作用一致）。
 
+```vue
+<template>
+  <div class="person">
+    <h3>姓: <input type="text" v-model="firstName" /></h3>
+    <h3>名: <input type="text" v-model="lastName" /></h3>
+    <h3>全名: {{ fullName }}</h3>
+  </div>
+</template>
 
+<script setup lang="ts" name="Person">
+import { ref, computed } from "vue";
+
+let firstName = ref("Zhang");
+let lastName = ref("San");
+
+let fullName = computed(() => {
+  return firstName.value + "-" + lastName.value;
+});
+</script>
+
+```
+
+![](../../public/img/Snipaste_2025-03-12_22-20-49.png)
+
+
+若想直接修改fullName，是不可以的，这么定义的fullName是一个计算属性，且是只读的
+```vue
+<template>
+  <div class="person">
+    <h3>姓: <input type="text" v-model="firstName" /></h3>
+    <h3>名: <input type="text" v-model="lastName" /></h3>
+    <h3>全名: {{ fullName }}</h3>
+    <div><button @click="updateFullName">update fullName</button></div>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { ref, computed } from "vue";
+
+let firstName = ref("Zhang");
+let lastName = ref("San");
+
+let fullName = computed(() => {
+  return firstName.value + "-" + lastName.value;
+});
+
+const updateFullName = () => {
+  fullName.value = "liSi";
+};
+</script>
+
+```
+![](../../public/img/Snipaste_2025-03-12_22-38-22.png)
+![](../../public/img/Snipaste_2025-03-12_22-27-15.png)
+
+这么定义的fullName是一个计算属性，可读可写
+
+```vue
+<template>
+  <div class="person">
+    <h3>姓: <input type="text" v-model="firstName" /></h3>
+    <h3>名: <input type="text" v-model="lastName" /></h3>
+    <h3>全名: {{ fullName }}</h3>
+    <div><button @click="updateFullName">update fullName</button></div>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { ref, computed } from "vue";
+
+let firstName = ref("Zhang");
+let lastName = ref("San");
+
+let fullName = computed({
+  get() {
+    return firstName.value + "-" + lastName.value;
+  },
+  set(val) {
+    // val是updateFullName方法修改后返回的新值
+    // console.log(val);
+    const [str1, str2] = val.split("-");
+    firstName.value = str1;
+    lastName.value = str2;
+  },
+});
+
+const updateFullName = () => {
+  fullName.value = "Li-Si";
+};
+</script>
+
+```
+
+![](../../public/img/1899836063048794112.gif)
