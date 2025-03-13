@@ -398,7 +398,7 @@ function test(){
 </script>
 ```
 
-### ref 对比 reactive
+## ref 对比 reactive
 宏观角度看：
 
 > 1. `ref`用来定义：**基本类型数据**、**对象类型数据**；
@@ -447,8 +447,8 @@ state.name = newState.name
 > 1. 若需要一个基本类型的响应式数据，必须使用`ref`。
 > 2. 若需要一个响应式对象，层级不深，`ref`、`reactive`都可以。
 > 3. 若需要一个响应式对象，且层级较深，推荐使用`reactive`。
----
-### toRefs 与 toRef
+
+## toRefs 与 toRef
 
 - 作用：将一个响应式对象中的每一个属性，转换为`ref`对象。
 - 备注：`toRefs`与`toRef`功能一致，但`toRefs`可以批量转换。
@@ -495,9 +495,9 @@ const showTel = () => {
 </script>
 
 ```
----
 
-### computed
+
+## computed
 作用：根据已有数据计算出新数据（和`Vue2`中的`computed`作用一致）。
 
 ```vue
@@ -594,3 +594,8 @@ const updateFullName = () => {
 ```
 
 ![](../../public/img/1899836063048794112.gif)
+
+
+
+## watch
+
