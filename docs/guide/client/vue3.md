@@ -599,3 +599,161 @@ const updateFullName = () => {
 
 ## watch
 
+- 作用：监视数据的变化（和`Vue2`中的`watch`作用一致）
+- 特点：`Vue3`中的`watch`只能监视以下**四种数据**：
+
+> 1. `ref`定义的数据。
+> 2. `reactive`定义的数据。
+> 3. 函数返回一个值（`getter`函数）。
+> 4. 一个包含上述内容的数组。
+
+我们在`Vue3`中使用`watch`的时候，通常会遇到以下几种情况：
+
+### 情况一
+监视`ref`定义的【基本类型】数据：直接写数据名即可，监视的是其`value`值的改变。
+
+
+```vue
+<template>
+  <div class="person">
+    <h3>情况一：监视【ref】定义的【基本类型】数据</h3>
+    <h3>{{ sum }}</h3>
+    <h3><button @click="add">点击++</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { ref, watch } from "vue";
+
+let sum = ref(0);
+
+const add = () => {
+  sum.value++;
+};
+
+let stopWatch = watch(sum, (newValue, oldValue) => {
+  console.log("新", newValue);
+  console.log("旧", oldValue);
+  if (sum.value == 10) {
+    stopWatch(); // 停止监听
+  }
+});
+</script>
+
+```
+![](../../public/img/Snipaste_2025-03-17_20-42-09.png)
+
+### 情况二
+监视`ref`定义的【对象类型】数据：直接写数据名，监视的是对象的【地址值】，若想监视对象内部的数据，要手动开启深度监视。
+
+:::tip
+注意：
+
+* 若修改的是`ref`定义的对象中的属性，`newValue` 和 `oldValue` 都是新值，因为它们是同一个对象。
+
+* 若修改整个`ref`定义的对象，`newValue` 是新值， `oldValue` 是旧值，因为不是同一个对象了。
+:::
+
+
+```vue
+<template>
+  <div class="person">
+    <h3>情况二：监视【ref】定义的【对象类型】数据</h3>
+    <h3>{{ person.name }}</h3>
+    <h3>{{ person.age }}</h3>
+    <h3><button @click="changeName">update Name</button></h3>
+    <h3><button @click="changeAge">update Age</button></h3>
+    <h3><button @click="changePerson">修改整个</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { ref, watch } from "vue";
+
+let person = ref({
+  name: "张三",
+  age: 30,
+});
+
+const changeName = () => {
+  person.value.name += "~";
+};
+const changeAge = () => {
+  person.value.age++;
+};
+
+const changePerson = () => {
+  person.value = { name: "Jack", age: 60 };
+};
+
+// 监视【ref】定义的【对象类型】数据，监视的是对象的地址值，若想监视对象内部属性的变化，需要手动开启深度监视
+// watch的第一个参数是:被监视的数据
+// watch的第二个参数是:监视的回调
+// watch的第三个参数是:配置对象(deep、immediate等等)
+watch(
+  person,
+  (newValue, oldValue) => {
+    console.log("新", newValue);
+    console.log("旧", oldValue);
+  },
+  { deep: true, immediate: true }
+);
+</script>
+
+
+```
+ 
+### 情况三
+
+监视`reactive`定义的【对象类型】数据，且默认开启了深度监视。
+
+> 深度监视不可关闭，且新值旧值都是新值，因为地址没变
+
+```vue
+<template>
+  <div class="person">
+    <h3>情况三：监视【reactive】定义的【对象类型】数据</h3>
+    <h3>{{ person.name }}</h3>
+    <h3>{{ person.age }}</h3>
+    <h3><button @click="changeName">update Name</button></h3>
+    <h3><button @click="changeAge">update Age</button></h3>
+    <h3><button @click="changePerson">修改整个</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { reactive, watch } from "vue";
+
+let person = reactive({
+  name: "张三",
+  age: 30,
+});
+
+const changeName = () => {
+  person.name += "~";
+};
+const changeAge = () => {
+  person.age++;
+};
+
+const changePerson = () => {
+  person = Object.assign(person, { name: "Jack", age: 60 });
+};
+
+watch(person, (newValue, oldValue) => {
+  console.log("新", newValue);
+  console.log("旧", oldValue);
+});
+</script>
+
+```
+
+### 情况四
+
+监视`ref`或`reactive`定义的【对象类型】数据中的**某个属性**，注意点如下：
+
+1. 若该属性值**不是**【对象类型】，需要写成函数形式。
+2. 若该属性值是**依然**是【对象类型】，可直接编，也可写成函数，建议写成函数。
+
+结论：监视的要是对象里的属性，那么最好写函数式，注意点：若是对象监视的是地址值，需要关注对象内部，需要手动开启深度监视。
+
