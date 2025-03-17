@@ -757,3 +757,182 @@ watch(person, (newValue, oldValue) => {
 
 结论：监视的要是对象里的属性，那么最好写函数式，注意点：若是对象监视的是地址值，需要关注对象内部，需要手动开启深度监视。
 
+```vue
+<template>
+  <div class="person">
+    <h3>{{ person.name }}</h3>
+    <h3>{{ person.age }}</h3>
+    <h3>{{ person.car.car1 + "、" + person.car.car2 }}</h3>
+    <h3><button @click="changeName">update Name</button></h3>
+    <h3><button @click="changeAge">update Age</button></h3>
+    <h3><button @click="changeCar1">update Car1</button></h3>
+    <h3><button @click="changeCar2">update Car2</button></h3>
+    <h3><button @click="changeCar">修改整个车</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { reactive, watch } from "vue";
+
+let person = reactive({
+  name: "张三",
+  age: 30,
+  car: {
+    car1: "宝马",
+    car2: "奔驰",
+  },
+});
+
+const changeName = () => {
+  person.name += "~";
+};
+const changeAge = () => {
+  person.age++;
+};
+
+const changeCar1 = () => {
+  person.car.car1 = "奥迪";
+};
+const changeCar2 = () => {
+  person.car.car2 = "大众";
+};
+const changeCar = () => {
+  person.car = { car1: "雅迪", car2: "台铃" };
+};
+
+// 监视，情况四:监视响应式对象中的某个属性，且该属性时基本类型的，要写成函数式
+watch(
+  () => person.name,
+  (newValue, oldValue) => {
+    console.log("新", newValue);
+    console.log("旧", oldValue);
+  }
+);
+
+// 监视，情况四:监视响应式对象中的某个属性，且该属性是对象类型的，可以直接写，也能写函数，更推荐写函数
+watch(
+  () => person.car,
+  (newValue, oldValue) => {
+    console.log("car变化了", newValue, oldValue);
+  },
+  { deep: true }
+);
+</script>
+
+```
+
+### 情况五
+
+监视上述的多个数据
+
+```vue
+<template>
+  <div class="person">
+    <h3>{{ person.name }}</h3>
+    <h3>{{ person.age }}</h3>
+    <h3>{{ person.car.car1 + "、" + person.car.car2 }}</h3>
+    <h3><button @click="changeName">update Name</button></h3>
+    <h3><button @click="changeAge">update Age</button></h3>
+    <h3><button @click="changeCar1">update Car1</button></h3>
+    <h3><button @click="changeCar2">update Car2</button></h3>
+    <h3><button @click="changeCar">修改整个车</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { reactive, watch } from "vue";
+
+let person = reactive({
+  name: "张三",
+  age: 30,
+  car: {
+    car1: "宝马",
+    car2: "奔驰",
+  },
+});
+
+const changeName = () => {
+  person.name += "~";
+};
+const changeAge = () => {
+  person.age++;
+};
+
+const changeCar1 = () => {
+  person.car.car1 = "奥迪";
+};
+const changeCar2 = () => {
+  person.car.car2 = "大众";
+};
+const changeCar = () => {
+  person.car = { car1: "雅迪", car2: "台铃" };
+};
+
+// 监视，情况五:监视上述的多个数据
+watch(
+  [() => person.name, () => person.car.car1],
+  (newValue, oldValue) => {
+    console.log(newValue, oldValue);
+  },
+  { deep: true }
+);
+</script>
+
+```
+
+## watchEffect
+
+* 官网：立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行该函数。
+
+* `watch`对比`watchEffect`
+
+   1. 都能监听响应式数据的变化，不同的是监听数据变化的方式不同
+  
+   2. `watch`：要明确指出监视的数据
+  
+   3. `watchEffect`：不用明确指出监视的数据（函数中用到哪些属性，那就监视哪些属性）。
+
+
+```vue
+<template>
+  <div class="person">
+    <h3>需求:当水温达到60度，或水位达到80cm时，给服务器发请求</h3>
+    <h3>水温{{ temp }}</h3>
+    <h3>水位{{ height }}</h3>
+    <h3><button @click="changeTemp">改水温</button></h3>
+    <h3><button @click="changeHeight">改高度</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts" name="Person">
+import { ref, watch, watchEffect } from "vue";
+
+let temp = ref(10);
+let height = ref(0);
+
+const changeTemp = () => {
+  temp.value += 10;
+};
+const changeHeight = () => {
+  height.value += 10;
+};
+
+// watch([temp, height], (newValue) => {
+//   // console.log(newValue, oldValue);
+//   const [newTemp, newHeight] = newValue;
+//   if (newTemp >= 60 || newHeight >= 80) {
+//     console.log("call server");
+//   }
+// });
+
+const stopWatch = watchEffect(() => {
+  if (temp.value >= 60 || height.value >= 80) {
+    console.log("call server");
+  }
+  if (temp.value === 100) {
+    stopWatch(); // 取消监视
+  }
+});
+</script>
+
+```
