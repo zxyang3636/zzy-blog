@@ -936,3 +936,350 @@ const stopWatch = watchEffect(() => {
 </script>
 
 ```
+
+## 标签的ref属性
+
+* 用在普通`DOM`标签上，获取的是`DOM`节点。
+
+* 用在组件标签上，获取的是组件实例对象。
+
+### ref放在标签上
+
+> 拿的是**DOM元素**
+
+示例：
+
+这样写有问题，引用组件情况下，与其他页面的id重复了
+
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h3 id="title">亚洲</h3>
+    <h3>中国</h3>
+    <h3><button @click="showLog">show log</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineOptions({
+  name: "Person",
+});
+const showLog = () => {
+  console.log(document.getElementById("title"));
+};
+</script>
+
+```
+
+```vue [App.vue]
+<template>
+  <h2 id="title">你好</h2>
+  <Person />
+</template>
+
+<script setup lang="ts">
+import Person from "./components/Person.vue";
+
+defineOptions({
+  name: "App",
+});
+</script>
+<style scoped></style>
+
+```
+
+![123](../../public/img/Snipaste_2025-03-18_20-29-49.png)
+
+
+这样才是对的⬇️
+```vue
+<template>
+  <div class="person">
+    <h3 ref="title">亚洲</h3>
+    <h3>中国</h3>
+    <h3><button @click="showLog">show log</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+
+defineOptions({
+  name: "Person",
+});
+
+let title = ref();
+const showLog = () => {
+  console.log(title.value);
+};
+</script>
+
+<style scoped>
+.person:first-child {
+  font-size: 12px;
+}
+</style>
+
+```
+![](../../public/img/Snipaste_2025-03-18_20-45-08.png)
+
+
+:::info
+![](../../public/img/Snipaste_2025-03-18_20-40-21.png)
+`data-v-xxxx` 这个标记，是因为样式中有了`scoped`
+:::
+
+
+### ref放在组件身上
+
+> 拿的是组件**实例对象**
+
+子传父
+
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h3 ref="title">亚洲</h3>
+    <h3>中国</h3>
+    <h3><button @click="showLog">show log</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, defineExpose } from "vue";
+
+defineOptions({
+  name: "Person",
+});
+
+let title = ref();
+
+let num1 = ref(0);
+let num2 = ref(1);
+let num3 = ref(2);
+const showLog = () => {
+  console.log(title.value);
+};
+
+// 使用defineExpose，父组件才能拿到num1, num2, num3
+// 使用defineExpose将组件中的数据交给外部
+defineExpose({ num1, num2, num3 });
+</script>
+
+<style scoped>
+.person:first-child {
+  font-size: 12px;
+}
+</style>
+
+```
+
+```vue [App.vue]
+<template>
+  <h2 id="title">你好</h2>
+  <Person ref="child" />
+  <h2><button @click="showLog">点击展示Person数据</button></h2>
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import Person from "./components/Person.vue";
+
+defineOptions({
+  name: "App",
+});
+
+const child = ref();
+
+const showLog = () => {
+  console.log(child.value);
+  console.log(child.value.num1);
+  console.log(child.value.num2);
+  console.log(child.value.num3);
+};
+</script>
+<style scoped></style>
+
+```
+
+
+
+![](../../public/img/Snipaste_2025-03-18_21-04-25.png)
+
+### defineExpose
+
+:::tip
+`defineExpose`用于明确地暴露组件的属性或方法给父组件。默认情况下，使用 `<script setup>` 定义的组件是完全封闭的，即其内部的状态和方法对外部（父组件）是不可见的。如果你希望某些状态或方法能够被父组件访问，就需要使用 defineExpose。
+:::
+
+## ts接口、泛型、自定义类型
+
+```ts [index.ts]
+// 定义一个接口，用于限制person对象的具体属性
+
+// 暴露方式： 1.默认暴露 2.分别暴露 3.统一暴露
+export interface PersonInter {
+    id: string;
+    name: string;
+    age: number;
+}
+
+// 自定义类型
+export type Persons = Array<PersonInter>;
+
+```
+
+```vue [Person.vue]
+<template>
+  <div class="person"></div>
+</template>
+
+<script setup lang="ts">
+// 如果引入的是值，那么就不用type; 但PersonInter是一种约束，就需要标记它是一个类型
+import { type PersonInter, type Persons } from "@/types";
+
+defineOptions({
+  name: "Person",
+});
+
+let person: PersonInter = { id: "xxxx", name: "Jack", age: 30 };
+
+let personList: Persons = [
+  { id: "xxxx1", name: "Jack", age: 30 },
+  { id: "xxxx2", name: "Marry", age: 23 },
+  { id: "xxxx3", name: "Lily", age: 22 },
+];
+</script>
+
+<style scoped>
+.person:first-child {
+  font-size: 12px;
+}
+</style>
+
+```
+
+## props
+
+<span class="marker-evy">**父传子** 简单demo</span>
+
+可理解为 父传给子一个`a`，值是`你好`
+```vue [App.vue]
+<template>
+  <Person a="你好" b="哈哈" />
+</template>
+
+<script setup lang="ts">
+import Person from "./components/Person.vue";
+
+defineOptions({
+  name: "App",
+});
+</script>
+<style scoped></style>
+
+```
+
+
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h2>{{ a }}</h2>
+    <h2>{{ b }}</h2>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { defineProps } from "vue";
+
+defineOptions({
+  name: "Person",
+});
+
+let x = defineProps(["a", "b"]);
+console.log(x);
+console.log(x.a);
+</script>
+
+<style scoped></style>
+
+```
+
+![](../../public/img/Snipaste_2025-03-18_21-49-34.png)
+
+
+### 简单测试
+
+![](../../public/img/Snipaste_2025-03-18_21-56-17.png)
+它的值是,被解析为：
+![](../../public/img/Snipaste_2025-03-18_21-57-27.png)
+特例就是，ref不需要加冒号`:`
+
+
+**完整示例**
+```vue [App.vue]
+<template>
+  <Person :list="personList" />
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+import Person from "./components/Person.vue";
+import type { Persons } from "./types";
+
+defineOptions({
+  name: "App",
+});
+
+let personList = reactive<Persons>([
+  { id: "qwerasdf1", name: "Lily", age: 20 },
+  { id: "qwerasdf2", name: "Jack", age: 34 },
+  { id: "qwerasdf3", name: "Mary", age: 45 },
+]);
+</script>
+<style scoped></style>
+
+```
+
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <ul>
+      <li v-for="item in list" :key="item.id">
+        {{ item.name }}-{{ item.age }}
+      </li>
+    </ul>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Persons } from "@/types";
+import { withDefaults } from "vue";
+
+defineOptions({
+  name: "Person",
+});
+
+// 只接收list
+let x = defineProps(["list"]);
+
+// 接收list+限制类型
+defineProps<{ list: Persons }>();
+
+// 接收list + 限制类型 + 限制必要性(可传，可不传) + 指定默认值
+withDefaults(defineProps<{ list?: Persons }>(), {
+  list: () => [{ id: "0001", name: "康师傅", age: 34 }],
+});
+</script>
+
+<style scoped></style>
+
+```
+
+### defineProps
+
+:::tip
+- 在vue3中，defineXXX是宏函数，宏函数不用引入可直接使用
+
+- `defineProps`是 Vue 3 提供的一个编译时宏（compile-time macro）用于在 `<script setup>` 中声明和获取 props。当你需要从父组件向子组件传递数据时，你可以在子组件中使用 `defineProps` 来接收这些数据。
+:::
