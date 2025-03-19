@@ -1283,3 +1283,25 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 
 - `defineProps`是 Vue 3 提供的一个编译时宏（compile-time macro）用于在 `<script setup>` 中声明和获取 props。当你需要从父组件向子组件传递数据时，你可以在子组件中使用 `defineProps` 来接收这些数据。
 :::
+
+## 生命周期
+
+又称生命周期、生命周期函数、生命周期钩子
+
+组件的生命周期
+
+**vue2生命周期：**
+
+> 创建
+> 挂载
+> 更新
+> 销毁
+
+![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-19_21-47-34.png)
+
+
+
+vue3生命周期
+
+
+![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-19_21-56-30.png)
