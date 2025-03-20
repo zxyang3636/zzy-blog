@@ -1286,6 +1286,36 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 
 ## 生命周期
 
+* 概念：`Vue`组件实例在创建时要经历一系列的初始化步骤，在此过程中`Vue`会在合适的时机，调用特定的函数，从而让开发者有机会在特定阶段运行自己的代码，这些特定的函数统称为：生命周期钩子
+
+* 规律：
+
+  > 生命周期整体分为四个阶段，分别是：**创建、挂载、更新、销毁**，每个阶段都有两个钩子，一前一后。
+
+* `Vue2`的生命周期
+
+  > 创建阶段：`beforeCreate`、`created`
+  >
+  > 挂载阶段：`beforeMount`、`mounted`
+  >
+  > 更新阶段：`beforeUpdate`、`updated`
+  >
+  > 销毁阶段：`beforeDestroy`、`destroyed`
+
+* `Vue3`的生命周期
+
+  > 创建阶段：`setup`
+  >
+  > 挂载阶段：`onBeforeMount`、`onMounted`
+  >
+  > 更新阶段：`onBeforeUpdate`、`onUpdated`
+  >
+  > 卸载阶段：`onBeforeUnmount`、`onUnmounted`
+
+* 常用的钩子：`onMounted`(挂载完毕)、`onUpdated`(更新完毕)、`onBeforeUnmount`(卸载之前)
+
+<br>
+
 又称生命周期、生命周期函数、生命周期钩子
 
 组件的生命周期
@@ -1305,3 +1335,240 @@ vue3生命周期
 
 
 ![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-19_21-56-30.png)
+
+
+<br>
+<span class="marker-evy">demo如下</span>
+
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h3>当前sum：{{ sum }}</h3>
+    <h3><button @click="sumAdd">点击++</button></h3>
+  </div>
+</template>
+
+<script setup lang="ts">
+import {
+  ref,
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUnmounted,
+} from "vue";
+
+defineOptions({
+  name: "Person",
+});
+
+let sum = ref(0);
+
+const sumAdd = () => {
+  sum.value += 1;
+};
+
+console.log("创建");
+
+onBeforeMount(() => {
+  console.log("挂载前");
+});
+
+onMounted(() => {
+  console.log("挂载完毕");
+});
+
+onBeforeUpdate(() => {
+  console.log("更新前");
+});
+
+onUpdated(() => {
+  console.log("更新完毕");
+});
+
+onBeforeUnmount(() => {
+  console.log("卸载前");
+});
+onUnmounted(() => {
+  console.log("卸载完毕");
+});
+</script>
+
+<style scoped></style>
+
+```
+
+```vue [App.vue]
+<template>
+  <Person v-if="isShow" />
+</template>
+
+<script setup lang="ts">
+import { ref } from "vue";
+import Person from "./components/Person.vue";
+
+defineOptions({
+  name: "App",
+});
+
+let isShow = ref(true);
+</script>
+<style scoped></style>
+
+```
+
+![](http://stdgkc9f5.hd-bkt.clouddn.com/img/1899836063048794112.gif)
+
+
+## 自定义hook
+
+- 什么是`hook`？—— 本质是一个函数，把`setup`函数中使用的`Composition API`进行了封装，类似于`vue2.x`中的`mixin`。
+
+- 自定义`hook`的优势：复用代码, 让`setup`中的逻辑更清楚易懂。
+
+
+如下代码，功能齐全但是，数据与方法比较混乱，可以使用hook进行改造
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h3>当前sum：{{ sum }}</h3>
+    <h3><button @click="sumAdd">点击++</button></h3>
+    <hr />
+    <div>
+      <img v-for="(dog, index) in dogList" :src="dog" :key="index" />
+    </div>
+    <div><button @click="addDog">来一只狗</button></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive, ref } from "vue";
+import axios from "axios";
+
+defineOptions({
+  name: "Person",
+});
+
+let sum = ref(0);
+
+const sumAdd = () => {
+  sum.value += 1;
+};
+
+let dogList = reactive([
+  "https://images.dog.ceo/breeds/pembroke/n02113023_7316.jpg",
+]);
+
+const addDog = async () => {
+  try {
+    let result = await axios.get(
+      "https://dog.ceo/api/breed/pembroke/images/random"
+    );
+    dogList.push(result.data.message);
+    console.log(result.data.message);
+  } catch (error) {
+    alert(error);
+  }
+};
+</script>
+
+<style scoped>
+.person {
+  width: 500px;
+  height: 300px;
+}
+img {
+  height: 100px;
+  margin-right: 10px;
+}
+</style>
+
+```
+
+创建hooks文件夹，将每个不同模块进行拆分，命名必须使用`useXXX`这种形式
+
+改进过后
+```vue [Person.vue]
+<template>
+  <div class="person">
+    <h3>当前sum：{{ sum }}</h3>
+    <h3><button @click="sumAdd">点击++</button></h3>
+    <hr />
+    <div>
+      <img v-for="(dog, index) in dogList" :src="dog" :key="index" />
+    </div>
+    <div><button @click="addDog">来一只狗</button></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+defineOptions({
+  name: "Person",
+});
+import useDog from "@/hooks/useDog";
+import useSum from "@/hooks/useSum";
+
+const { dogList, addDog } = useDog();
+const { sum, sumAdd } = useSum();
+</script>
+
+<style scoped>
+.person {
+  width: 500px;
+  height: 300px;
+}
+img {
+  height: 100px;
+  margin-right: 10px;
+}
+</style>
+
+```
+
+```ts [useDog.ts]
+import { reactive, onMounted } from "vue";
+import axios from "axios";
+export default () => {
+    // 钩子函数也是不影响使用的
+    onMounted(() => {
+        addDog();
+    });
+
+    let dogList = reactive([
+        "https://images.dog.ceo/breeds/pembroke/n02113023_7316.jpg",
+    ]);
+
+    const addDog = async () => {
+        try {
+            let result = await axios.get(
+                "https://dog.ceo/api/breed/pembroke/images/random"
+            );
+            dogList.push(result.data.message);
+            console.log(result.data.message);
+        } catch (error) {
+            alert(error);
+        }
+    };
+    return { dogList, addDog }
+}
+```
+
+```ts [useSum.ts]
+import { ref } from "vue";
+export default () => {
+    let sum = ref(0);
+
+    const sumAdd = () => {
+        sum.value += 1;
+    };
+    return { sum, sumAdd }
+}
+
+```
+
+![](http://stdgkc9f5.hd-bkt.clouddn.com/img/189983606304eryteryt.gif)
+
+## 路由
+
+![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-20_22-52-29.png)
