@@ -1327,14 +1327,14 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 > 更新
 > 销毁
 
-![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-19_21-47-34.png)
+![](../../public/img/Snipaste_2025-03-19_21-47-34.png)
 
 
 
 vue3生命周期
 
 
-![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-19_21-56-30.png)
+![](../../public/img/Snipaste_2025-03-19_21-56-30.png)
 
 
 <br>
@@ -1418,7 +1418,7 @@ let isShow = ref(true);
 
 ```
 
-![](http://stdgkc9f5.hd-bkt.clouddn.com/img/1899836063048794112.gif)
+![](../../public/img/1899836063048794112.gif)
 
 
 ## 自定义hook
@@ -1567,8 +1567,8 @@ export default () => {
 
 ```
 
-![](http://stdgkc9f5.hd-bkt.clouddn.com/img/189983606304eryteryt.gif)
+![](../../public/img/189983606304eryteryt.gif)
 
 ## 路由
 
-![](http://stdgkc9f5.hd-bkt.clouddn.com/img/Snipaste_2025-03-20_22-52-29.png)
+![](../../public/img/Snipaste_2025-03-20_22-52-29.png)
