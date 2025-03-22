@@ -1572,3 +1572,114 @@ export default () => {
 ## 路由
 
 ![](../../public/img/Snipaste_2025-03-20_22-52-29.png)
+
+路由安装
+
+``` 
+npm i vue-router
+```
+
+### 基本切换
+
+在`src`下创建`router`文件夹，创建`index.ts`文件
+
+```ts [index.ts]
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+import About from "@/components/About.vue"
+import Home from "@/components/Home.vue"
+import News from "@/components/News.vue"
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => Home
+        },
+        {
+            path: "/about",
+            component: () => About
+        },
+        {
+            path: "/news",
+            component: () => News
+        },
+    ]
+});
+
+export default router;
+```
+
+```ts [main.ts]
+import './assets/main.css'
+
+import { createApp } from 'vue'
+import App from './App.vue'
+// 引入路由器
+import router from './router'
+
+// 创建一个应用
+const app = createApp(App)
+// 使用路由器
+app.use(router)
+// 挂载整个应用到app容器中
+app.mount('#app')
+
+```
+
+```vue [App.vue]
+<template>
+  <div>
+    <h1>路由 示例</h1>
+    <div class="navigate">
+      <RouterLink to="home" active-class="highlight">首页</RouterLink>
+      <RouterLink to="news" active-class="highlight">新闻</RouterLink>
+      <RouterLink to="about" active-class="highlight">关于</RouterLink>
+    </div>
+    <div class="main-content">
+      <RouterView></RouterView>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { RouterView, RouterLink } from "vue-router";
+
+defineOptions({
+  name: "App",
+});
+</script>
+<style scoped>
+.highlight {
+  color: aqua;
+  background-color: rgb(253, 238, 219);
+}
+.navigate {
+  width: 100%;
+  height: 100px;
+}
+.navigate a {
+  margin-left: 100px;
+  display: block;
+  float: left;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.main-content {
+  border: 1px solid rgb(177, 125, 211);
+  overflow: hidden;
+  height: 350px;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+![](../../public/img/189983604509820394.gif)
