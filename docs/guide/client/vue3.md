@@ -1683,3 +1683,401 @@ defineOptions({
 ```
 
 ![](../../public/img/189983604509820394.gif)
+
+---
+
+### 注意点
+
+1. 路由组件通常存放在`pages` 或 `views`文件夹，一般组件通常存放在`components`文件夹。
+
+2. 通过点击导航，视觉效果上“消失” 了的路由组件，默认是被**卸载**掉的，需要的时候再去**挂载**。
+
+<br/>
+<br/>
+
+- 路由组件
+靠路由规则渲染出来的
+
+- 一般组件
+亲手写标签出来的
+
+![](../../public/img/Snipaste_2025-03-24_20-57-33.png)
+
+### 路由器工作模式
+
+1. `history`模式
+
+> 优点：`URL`更加美观，不带有`#`，更接近传统的网站`URL`。
+>
+> 缺点：后期项目上线，需要服务端配合处理路径问题，否则刷新会有`404`错误。
+
+```ts
+const router = createRouter({
+	history:createWebHistory(), //history模式
+	/******/
+})
+```
+
+2. `hash`模式
+
+> 优点：兼容性更好，因为不需要服务器端处理路径。
+>
+> 缺点：`URL`带有`#`不太美观，且在`SEO`优化方面相对较差。
+
+```ts
+const router = createRouter({
+	history:createWebHashHistory(), //hash模式
+	/******/
+})
+```
+
+### to的两种写法
+
+```vue
+<!-- 第一种：to的字符串写法 -->
+<router-link active-class="active" to="/home">主页</router-link>
+
+<!-- 第二种：to的对象写法 -->
+<router-link active-class="active" :to="{path:'/home'}">Home</router-link>
+```
+
+### 命名路由
+
+```ts
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+import About from "@/views/About.vue"
+import Home from "@/views/Home.vue"
+import News from "@/views/News.vue"
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => Home
+        },
+        {
+            path: "/about",
+            component: () => About
+        },
+        {
+            name: 'xinwen',
+            path: "/news",
+            component: () => News
+        },
+    ]
+});
+
+export default router;
+```
+
+```vue
+<RouterLink :to="{name:'xinwen'}" active-class="highlight">新闻</RouterLink>
+```
+
+### 嵌套路由
+
+编写子路由
+
+```vue
+<template>
+  <h3>id：xxx</h3>
+  <h3>标题：xxx</h3>
+  <h3>详情：xxx</h3>
+</template>
+
+<script lang="ts" setup></script>
+
+<style scoped></style>
+
+```
+
+配置路由规则，使用`children`配置项
+
+```ts
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+import About from "@/views/About.vue"
+import Home from "@/views/Home.vue"
+import News from "@/views/News.vue"
+import Detail from "@/components/Detail.vue";
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => Home
+        },
+        {
+            path: "/about",
+            component: () => About
+        },
+        {
+            name: 'xinwen',
+            path: "/news",
+            component: () => News,
+            children: [
+                {
+                    path: "detail",
+                    component: Detail
+                }
+            ]
+        },
+    ]
+});
+
+export default router;
+```
+
+跳转路由（记得要加完整路径）
+```vue
+<template>
+  <div class="newsList">
+    <RouterLink :to="{ path: '/news/detail' }" v-for="news in newsList">{{ news.title }}</RouterLink>
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList{
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail{
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+  
+}
+</style>
+
+```
+
+记得去`该`组件中预留一个`<router-view>`
+
+### 路由传参-query参数
+
+第一种方式
+
+```vue [News.vue]
+<template>
+  <div class="newsList">
+    <RouterLink
+      :to="`/news/detail?id=${news.id}&title=${news.title}&content=${news.content}`"
+      v-for="news in newsList"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ query.id }}</h3>
+  <h3>标题：{{ query.title }}</h3>
+  <h3>详情：{{ query.content }}</h3>
+</template>
+
+<script lang="ts" setup>
+import { toRefs } from "vue";
+import { useRoute } from "vue-router";
+defineOptions({
+  name: "Detail",
+});
+
+let route = useRoute();
+let { query } = toRefs(route);
+console.log("route", route);
+</script>
+
+<style scoped></style>
+
+```
+
+**第二种方式**
+
+```vue [News.vue]
+<template>
+  <div class="newsList">
+    <RouterLink
+      :to="{
+        path: '/news/detail',
+        query: {
+          id: news.id,
+          content: news.content,
+          title: news.title,
+        },
+      }"
+      v-for="news in newsList"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ query.id }}</h3>
+  <h3>标题：{{ query.title }}</h3>
+  <h3>详情：{{ query.content }}</h3>
+</template>
+
+<script lang="ts" setup>
+import { toRefs } from "vue";
+import { useRoute } from "vue-router";
+defineOptions({
+  name: "Detail",
+});
+
+let route = useRoute();
+let { query } = toRefs(route);
+console.log("route", route);
+</script>
+
+<style scoped></style>
+
+```
+
+![](../../public/img/189983604512356334fdd.gif)
