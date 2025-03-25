@@ -2081,3 +2081,425 @@ console.log("route", route);
 ```
 
 ![](../../public/img/189983604512356334fdd.gif)
+
+### params参数
+
+**第一种方式**
+
+```vue [News.vue]
+<template>
+  <div class="newsList">
+    <RouterLink
+      v-for="news in newsList"
+      :to="`/news/detail/${news.id}/${news.title}/${news.content}`"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+![](../../public/img/Snipaste_2025-03-25_22-22-53.png)
+```ts [index.ts]
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+import About from "@/views/About.vue"
+import Home from "@/views/Home.vue"
+import News from "@/views/News.vue"
+import Detail from "@/components/Detail.vue";
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => Home
+        },
+        {
+            path: "/about",
+            component: () => About
+        },
+        {
+            name: 'xinwen',
+            path: "/news",
+            component: () => News,
+            children: [
+                {
+                    path: "detail/:id/:title/:content",
+                    component: Detail
+                }
+            ]
+        },
+    ]
+});
+
+export default router;
+```
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ params.id }}</h3>
+  <h3>标题：{{ params.title }}</h3>
+  <h3>详情：{{ params.content }}</h3>
+</template>
+
+<script lang="ts" setup>
+import { toRefs } from "vue";
+import { useRoute } from "vue-router";
+defineOptions({
+  name: "Detail",
+});
+
+let route = useRoute();
+let { params } = toRefs(route);
+console.log("route", route);
+</script>
+
+<style scoped></style>
+
+```
+
+**第二种方式**
+
+```vue [News.vue]
+<template>
+  <div class="newsList">
+    <RouterLink
+      v-for="news in newsList"
+      :to="{
+        name: 'xinwen',
+        params: {
+          id: news.id,
+          title: news.title,
+          content: news.content,
+        },
+      }"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+
+
+:::warning
+1. 如果路由中有占位，但传参时没有传会报错，可以通过在路由中这样写：`path:'detail/:id/:title/:content?'` 添加`?`即可,配置参数必要性
+
+2. 传递`params`参数时，若使用`to`的对象写法，必须使用`name`配置项，不能用`path`，并且该写法不能传递数组和对象
+
+3. 传递`params`参数时，需要提前在规则中占位。
+:::
+
+### 路由props配置
+
+第一种写法:将路由收到的所有params参数作为props传给路由组件
+
+```ts [index.ts]
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => import('@/views/Home.vue')
+        },
+        {
+            path: "/about",
+            component: () => import('@/views/About.vue')
+        },
+        {
+            name: 'xinwen',
+            path: "/news",
+            component: () => import('@/views/News.vue'),
+            children: [
+                {
+                    path: "detail/:id/:title/:content",
+                    component: () => import('@/components/Detail.vue'),
+                    props: true
+                }
+            ]
+        },
+    ]
+});
+
+export default router;
+```
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ id }}</h3>
+  <h3>标题：{{ title }}</h3>
+  <h3>详情：{{ content }}</h3>
+</template>
+
+<script lang="ts" setup>
+import { toRefs } from "vue";
+import { useRoute } from "vue-router";
+defineOptions({
+  name: "Detail",
+});
+
+
+defineProps(["id", "title", "content"]);
+</script>
+
+<style scoped></style>
+
+```
+
+
+**第二种写法**:函数写法，可以自己决定将什么作为props给路由组件
+
+```ts [index.ts]
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            path: "/home",
+            component: () => import('@/views/Home.vue')
+        },
+        {
+            path: "/about",
+            component: () => import('@/views/About.vue')
+        },
+        {
+            name: 'xinwen',
+            path: "/news",
+            component: () => import('@/views/News.vue'),
+            children: [
+                {
+                    path: "detail/:id/:title/:content",
+                    component: () => import('@/components/Detail.vue'),
+                    // props: true
+                    props(route) {
+                        return route.query
+                    }
+                }
+            ]
+        },
+    ]
+});
+
+export default router;
+```
+
+```vue [News.vue]
+<template>
+  <div class="newsList">
+    <RouterLink
+      v-for="news in newsList"
+      :to="{
+        name: 'xinwen',
+        query: {
+          id: news.id,
+          title: news.title,
+          content: news.content,
+        },
+      }"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ id }}</h3>
+  <h3>标题：{{ title }}</h3>
+  <h3>详情：{{ content }}</h3>
+</template>
+
+<script lang="ts" setup>
+defineOptions({
+  name: "Detail",
+});
+
+defineProps(["id", "title", "content"]);
+</script>
+
+<style scoped></style>
+
+```
+
+**第三种写法**:对象写法，可以自己决定将什么作为props给路由组件
+
+这种写法只能写死，没有什么意义
+```ts
+children: [
+            {
+                path: "detail/:id/:title/:content",
+                component: () => import('@/components/Detail.vue'),
+                // props: true
+                // props(route) {
+                //     return route.query
+                // }
+                props: {
+                    x: 1,
+                    y: 2,
+                    z: 3
+                }
+            }
+        ]
+```
