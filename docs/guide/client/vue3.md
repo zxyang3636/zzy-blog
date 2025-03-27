@@ -2503,3 +2503,54 @@ children: [
             }
         ]
 ```
+
+
+
+
+
+---
+
+### replace属性
+
+1. 作用：控制路由跳转时操作浏览器历史记录的模式。
+
+2. 浏览器的历史记录有两种写入方式：分别为`push`和`replace`：
+
+  - `push`是追加历史记录（默认值）。
+  - `replace`是替换当前记录。
+
+3. 开启`replace`模式：
+
+```vue
+<RouterLink replace .......>News</RouterLink>
+```
+
+### 编程式路由导航
+
+可以理解为，脱离`<RouterLink/>`实现路由跳转
+
+简单demo首页停留三秒后，跳转
+
+```vue
+<template>
+  <h1>Home</h1>
+</template>
+
+<script setup lang="ts">
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+let router = useRouter();
+
+onMounted(() => {
+  setTimeout(() => {
+    router.push("news");
+  }, 3000);
+});
+</script>
+
+<style scoped></style>
+
+```
+
+
