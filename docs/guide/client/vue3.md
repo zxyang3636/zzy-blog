@@ -1,12 +1,14 @@
-# Vue3快速上手
+# Vue3 快速上手
 
-## Vue3简介
-- 2020年9月18日，`Vue.js`发布版`3.0`版本，代号：`One Piece`（n
-- 经历了：[4800+次提交](https://github.com/vuejs/core/commits/main)、[40+个RFC](https://github.com/vuejs/rfcs/tree/master/active-rfcs)、[600+次PR](https://github.com/vuejs/vue-next/pulls?q=is%3Apr+is%3Amerged+-author%3Aapp%2Fdependabot-preview+)、[300+贡献者](https://github.com/vuejs/core/graphs/contributors)
+## Vue3 简介
+
+- 2020 年 9 月 18 日，`Vue.js`发布版`3.0`版本，代号：`One Piece`（n
+- 经历了：[4800+次提交](https://github.com/vuejs/core/commits/main)、[40+个 RFC](https://github.com/vuejs/rfcs/tree/master/active-rfcs)、[600+次 PR](https://github.com/vuejs/vue-next/pulls?q=is%3Apr+is%3Amerged+-author%3Aapp%2Fdependabot-preview+)、[300+贡献者](https://github.com/vuejs/core/graphs/contributors)
 - 官方发版地址：[Release v3.0.0 One Piece · vuejs/core](https://github.com/vuejs/core/releases/tag/v3.0.0)
-- 截止2023年10月，最新的公开版本为：`3.3.4`
+- 截止 2023 年 10 月，最新的公开版本为：`3.3.4`
 
 ### 性能的提升
+
 - 打包大小减少`41%`。
 
 - 初次渲染快`55%`, 更新渲染快`133%`。
@@ -14,6 +16,7 @@
 - 内存减少`54%`。
 
 ### 新的特性
+
 `Composition API`（组合`API`）：
 
 - `setup`
@@ -24,17 +27,19 @@
 
   ......
 
-## 创建Vue3工程
+## 创建 Vue3 工程
+
 ### 基于 vue-cli 创建
+
 点击查看[官方文档](https://cli.vuejs.org/zh/guide/creating-a-project.html#vue-create)
 
->备注：目前`vue-cli`已处于维护模式，官方推荐基于 `Vite` 创建项目。
+> 备注：目前`vue-cli`已处于维护模式，官方推荐基于 `Vite` 创建项目。
 
 ```shell
 ## 查看@vue/cli版本，确保@vue/cli版本在4.5.0以上
 vue --version
 
-## 安装或者升级你的@vue/cli 
+## 安装或者升级你的@vue/cli
 npm install -g @vue/cli
 
 ## 执行创建命令
@@ -51,14 +56,15 @@ npm run serve
 ```
 
 ### 基于 vite 创建
+
 `vite` 是新一代前端构建工具，官网地址：[https://vitejs.cn](https://vitejs.cn/)，`vite`的优势如下：
 
 - 轻量快速的热重载（`HMR`），能实现极速的服务启动。
 - 对 `TypeScript`、`JSX`、`CSS` 等支持开箱即用。
 - 真正的按需编译，不再等待整个应用编译完成。
 - `webpack`构建 与 `vite`构建对比图如下：
-![](../../public/img/1683167182037-71c78210-8217-4e7d-9a83-e463035efbbe.png)
-![](../../public/img/1683167204081-582dc237-72bc-499e-9589-2cdfd452e62f.png)
+  ![](../../public/img/1683167182037-71c78210-8217-4e7d-9a83-e463035efbbe.png)
+  ![](../../public/img/1683167204081-582dc237-72bc-499e-9589-2cdfd452e62f.png)
 
 具体操作如下（点击查看[官方文档](https://cn.vuejs.org/guide/quick-start.html#creating-a-vue-application)）
 
@@ -86,7 +92,8 @@ npm create vue@latest
 ## 是否添加Prettiert代码格式化
 √ Add Prettier for code formatting?  No
 ```
-自己动手编写一个App组件
+
+自己动手编写一个 App 组件
 
 ```vue
 <template>
@@ -96,18 +103,18 @@ npm create vue@latest
 </template>
 
 <script lang="ts">
-  export default {
-    name:'App' //组件名
-  }
+export default {
+  name: "App", //组件名
+};
 </script>
 
 <style>
-  .app {
-    background-color: #ddd;
-    box-shadow: 0 0 10px;
-    border-radius: 10px;
-    padding: 20px;
-  }
+.app {
+  background-color: #ddd;
+  box-shadow: 0 0 10px;
+  border-radius: 10px;
+  padding: 20px;
+}
 </style>
 ```
 
@@ -117,19 +124,22 @@ npm create vue@latest
 - 加载`index.html`后，`Vite` 解析 `<script type="module" src="xxx">` 指向的`JavaScript`。
 - `Vue3`中是通过 `createApp` 函数创建一个应用实例。
 
+## Vue3 核心语法
 
-## Vue3核心语法
 ### OptionsAPI 与 CompositionAPI
+
 - `Vue2`的`API`设计是`Options`（配置）风格的。选项式
 - `Vue3`的`API`设计是`Composition`（组合）风格的。组合式
 
 ### Options API 的弊端
+
 `Options`类型的 `API`，数据、方法、计算属性等，是分散在：`data`、`methods`、`computed`中的，若想新增或者修改一个需求，就需要分别修改：`data`、`methods`、`computed`，不便于维护和复用。
 
 <img src="../../public/img/1696662197101-55d2b251-f6e5-47f4-b3f1-d8531bbf9279.gif" alt="1.gif" style="zoom:70%;border-radius:20px;float:left;margin-right:70px" />
 <img src="../../public/img/1696662200734-1bad8249-d7a2-423e-a3c3-ab4c110628be.gif" alt="1.gif" style="zoom:70%;border-radius:20px" />
 
 ### Composition API 的优势
+
 可以用函数的方式，更加优雅的组织代码，让相关功能的代码更加有序的组织在一起。
 
 <img src="../../public/img/1696662249851-db6403a1-acb5-481a-88e0-e1e34d2ef53a.gif" alt="3.gif" style="height:300px;border-radius:10px;margin-bottom:20px"  />
@@ -137,6 +147,7 @@ npm create vue@latest
 <img src="../../public/img/1696662256560-7239b9f9-a770-43c1-9386-6cc12ef1e9c0.gif" alt="4.gif" style="height:300px;border-radius:10px"  />
 
 ### setup 概述
+
 `setup`是`Vue3`中一个新的配置项，值是一个函数，它是 `Composition API` **“表演的舞台**_**”**_，组件中所用到的：数据、方法、计算属性、监视......等等，均配置在`setup`中。
 
 特点如下：
@@ -146,20 +157,19 @@ npm create vue@latest
 - `setup`函数会在`beforeCreate`之前调用，它是“领先”所有钩子执行的。
 
 ### setup 的返回值
+
 - 若返回一个**对象**：则对象中的：属性、方法等，在模板中均可以直接使用**（重点关注）。**
 - 若返回一个**函数**：则可以自定义渲染内容，代码如下：
 
 ```vue
-setup(){
-  return ()=> '你好啊！'
-}
+setup(){ return ()=> '你好啊！' }
 ```
 
 ### setup 与 Options API 的关系
 
 - `Vue2` 的配置（`data`、`methos`......）中**可以访问到** `setup`中的属性、方法。
 - 但在`setup`中**不能访问到**`Vue2`的配置（`data`、`methos`......）。
-- 如果与`Vue2`冲突，则`setup`优先。setup可以与data、methods共存但不推荐
+- 如果与`Vue2`冲突，则`setup`优先。setup 可以与 data、methods 共存但不推荐
 
 ## setup 语法糖
 
@@ -196,21 +206,22 @@ function showTel() {
   alert(tel);
 }
 </script>
-
 ```
 
 #### 指定组件名字
+
 扩展：上述代码，还需要编写一个不写`setup`的`script`标签，去指定组件名字，比较麻烦，我们可以借助`vite`中的插件简化
 
 1. 第一步：`npm i vite-plugin-vue-setup-extend -D`
 2. 第二步：`vite.config.ts`
+
 ```ts
-import { defineConfig } from 'vite'
-import VueSetupExtend from 'vite-plugin-vue-setup-extend'
+import { defineConfig } from "vite";
+import VueSetupExtend from "vite-plugin-vue-setup-extend";
 
 export default defineConfig({
-  plugins: [ VueSetupExtend() ]
-})
+  plugins: [VueSetupExtend()],
+});
 ```
 
 在 Vue 3.3+ 中引入了 `defineOptions`，它可以让我们在 `<script setup>` 中直接定义这些组件选项，而不需要切换回传统的 `export default` 语法。
@@ -231,21 +242,23 @@ defineOptions 的作用是集中管理组件的元信息和配置选项。以下
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref } from "vue";
 
 // 使用 defineOptions 定义组件选项
 defineOptions({
-  name: 'MyComponent', // 组件名称
+  name: "MyComponent", // 组件名称
   inheritAttrs: false, // 禁用属性继承
-  customOption: 'This is a custom option' // 自定义选项
-})
+  customOption: "This is a custom option", // 自定义选项
+});
 
-const message = ref('Hello, Vue 3!')
+const message = ref("Hello, Vue 3!");
 </script>
 ```
+
 ---
 
 ### ref 创建：基本类型的响应式数据
+
 - **作用**：定义响应式变量。
 - **语法：**`let xxx = ref(初始值)`。
 - **返回值**：一个`RefImpl`的实例对象，简称`ref对象`或`ref`，`ref`对象的`value`**属性是响应式的**。
@@ -256,8 +269,8 @@ const message = ref('Hello, Vue 3!')
 ```vue
 <template>
   <div class="person">
-    <h2>姓名：{{name}}</h2>
-    <h2>年龄：{{age}}</h2>
+    <h2>姓名：{{ name }}</h2>
+    <h2>年龄：{{ age }}</h2>
     <button @click="changeName">修改名字</button>
     <button @click="changeAge">年龄+1</button>
     <button @click="showTel">点我查看联系方式</button>
@@ -265,29 +278,29 @@ const message = ref('Hello, Vue 3!')
 </template>
 
 <script setup lang="ts" name="Person">
-  import {ref} from 'vue'
-  // name和age是一个RefImpl的实例对象，简称ref对象，它们的value属性是响应式的。
-  let name = ref('张三')
-  let age = ref(18)
-  // tel就是一个普通的字符串，不是响应式的
-  let tel = '13888888888'
+import { ref } from "vue";
+// name和age是一个RefImpl的实例对象，简称ref对象，它们的value属性是响应式的。
+let name = ref("张三");
+let age = ref(18);
+// tel就是一个普通的字符串，不是响应式的
+let tel = "13888888888";
 
-  function changeName(){
-    // JS中操作ref对象时候需要.value
-    name.value = '李四'
-    console.log(name.value)
+function changeName() {
+  // JS中操作ref对象时候需要.value
+  name.value = "李四";
+  console.log(name.value);
 
-    // 注意：name不是响应式的，name.value是响应式的，所以如下代码并不会引起页面的更新。
-    // name = ref('zhang-san')
-  }
-  function changeAge(){
-    // JS中操作ref对象时候需要.value
-    age.value += 1 
-    console.log(age.value)
-  }
-  function showTel(){
-    alert(tel)
-  }
+  // 注意：name不是响应式的，name.value是响应式的，所以如下代码并不会引起页面的更新。
+  // name = ref('zhang-san')
+}
+function changeAge() {
+  // JS中操作ref对象时候需要.value
+  age.value += 1;
+  console.log(age.value);
+}
+function showTel() {
+  alert(tel);
+}
 </script>
 ```
 
@@ -306,7 +319,7 @@ const message = ref('Hello, Vue 3!')
     <ul>
       <li v-for="g in games" :key="g.id">{{ g.name }}</li>
     </ul>
-    <h2>测试：{{obj.a.b.c.d}}</h2>
+    <h2>测试：{{ obj.a.b.c.d }}</h2>
     <button @click="changeCarPrice">修改汽车价格</button>
     <button @click="changeFirstGame">修改第一游戏</button>
     <button @click="test">测试</button>
@@ -314,38 +327,39 @@ const message = ref('Hello, Vue 3!')
 </template>
 
 <script lang="ts" setup name="Person">
-import { reactive } from 'vue'
+import { reactive } from "vue";
 
 // 数据
-let car = reactive({ brand: '奔驰', price: 100 })
+let car = reactive({ brand: "奔驰", price: 100 });
 let games = reactive([
-  { id: 'ahsgdyfa01', name: '英雄联盟' },
-  { id: 'ahsgdyfa02', name: '王者荣耀' },
-  { id: 'ahsgdyfa03', name: '原神' }
-])
+  { id: "ahsgdyfa01", name: "英雄联盟" },
+  { id: "ahsgdyfa02", name: "王者荣耀" },
+  { id: "ahsgdyfa03", name: "原神" },
+]);
 let obj = reactive({
-  a:{
-    b:{
-      c:{
-        d:666
-      }
-    }
-  }
-})
+  a: {
+    b: {
+      c: {
+        d: 666,
+      },
+    },
+  },
+});
 
 function changeCarPrice() {
-  car.price += 10
+  car.price += 10;
 }
 function changeFirstGame() {
-  games[0].name = '流星蝴蝶剑'
+  games[0].name = "流星蝴蝶剑";
 }
-function test(){
-  obj.a.b.c.d = 999
+function test() {
+  obj.a.b.c.d = 999;
 }
 </script>
 ```
 
 ### ref 创建：对象类型的响应式数据
+
 - 其实`ref`接收的数据可以是：**基本类型**、**对象类型**。
 - 若`ref`接收的是对象类型，内部其实也是调用了`reactive`函数。
 
@@ -357,7 +371,7 @@ function test(){
     <ul>
       <li v-for="g in games" :key="g.id">{{ g.name }}</li>
     </ul>
-    <h2>测试：{{obj.a.b.c.d}}</h2>
+    <h2>测试：{{ obj.a.b.c.d }}</h2>
     <button @click="changeCarPrice">修改汽车价格</button>
     <button @click="changeFirstGame">修改第一游戏</button>
     <button @click="test">测试</button>
@@ -365,40 +379,41 @@ function test(){
 </template>
 
 <script lang="ts" setup name="Person">
-import { ref } from 'vue'
+import { ref } from "vue";
 
 // 数据
-let car = ref({ brand: '奔驰', price: 100 })
+let car = ref({ brand: "奔驰", price: 100 });
 let games = ref([
-  { id: 'ahsgdyfa01', name: '英雄联盟' },
-  { id: 'ahsgdyfa02', name: '王者荣耀' },
-  { id: 'ahsgdyfa03', name: '原神' }
-])
+  { id: "ahsgdyfa01", name: "英雄联盟" },
+  { id: "ahsgdyfa02", name: "王者荣耀" },
+  { id: "ahsgdyfa03", name: "原神" },
+]);
 let obj = ref({
-  a:{
-    b:{
-      c:{
-        d:666
-      }
-    }
-  }
-})
+  a: {
+    b: {
+      c: {
+        d: 666,
+      },
+    },
+  },
+});
 
-console.log(car)
+console.log(car);
 
 function changeCarPrice() {
-  car.value.price += 10
+  car.value.price += 10;
 }
 function changeFirstGame() {
-  games.value[0].name = '流星蝴蝶剑'
+  games.value[0].name = "流星蝴蝶剑";
 }
-function test(){
-  obj.value.a.b.c.d = 999
+function test() {
+  obj.value.a.b.c.d = 999;
 }
 </script>
 ```
 
 ## ref 对比 reactive
+
 宏观角度看：
 
 > 1. `ref`用来定义：**基本类型数据**、**对象类型数据**；
@@ -406,41 +421,44 @@ function test(){
 > 2. `reactive`用来定义：**对象类型数据**。
 
 区别：
+
 1.  `ref`创建的变量必须使用`.value`（可以使用`volar`插件自动添加`.value`）。
 2.  `reactive`重新分配一个新对象，会**失去**响应式（可以使用`Object.assign`去整体替换）。
 
 在 Vue 3 的响应式系统中，如果你直接对一个由 reactive 创建的响应式对象重新赋值为一个新的对象（例如 state = newState），那么这个新的对象将失去响应式特性 。这是因为 Vue 的响应式系统是基于代理（Proxy）实现的，直接替换整个对象会导致 Vue 无法继续追踪新对象的变化。
 
 ```js
-import { reactive } from 'vue'
+import { reactive } from "vue";
 
-const state = reactive({ count: 0 })
-state.count++ // 修改 count 的值会触发视图更新
+const state = reactive({ count: 0 });
+state.count++; // 修改 count 的值会触发视图更新
 // 当你直接重新分配一个新对象时，比如：
-state = { count: 10 }
+state = { count: 10 };
 ```
+
 这实际上会将 state 指向一个全新的普通对象 { count: 10 }，而这个新对象并没有被 reactive 包裹，因此它不再是响应式的。Vue 的响应式系统只能追踪最初通过 reactive 创建的对象及其属性变化。
 
 为了避免失去响应式，可以使用 `Object.assign` 或解构赋值的方式，将新对象的属性合并到现有的响应式对象中。这样可以确保 Vue 的响应式系统仍然能够追踪这些属性的变化。
-```js
-import { reactive } from 'vue'
 
-const state = reactive({ count: 0 })
+```js
+import { reactive } from "vue";
+
+const state = reactive({ count: 0 });
 
 // 使用 Object.assign 合并新对象
-Object.assign(state, { count: 10, name: 'Vue' })
+Object.assign(state, { count: 10, name: "Vue" });
 
-console.log(state) // 输出：{ count: 10, name: 'Vue' }
+console.log(state); // 输出：{ count: 10, name: 'Vue' }
 ```
+
 你也可以通过解构赋值的方式逐个更新属性：
+
 ```js
-const newState = { count: 10, name: 'Vue' }
+const newState = { count: 10, name: "Vue" };
 
-state.count = newState.count
-state.name = newState.name
+state.count = newState.count;
+state.name = newState.name;
 ```
-
-
 
 - 使用原则：
 
@@ -493,11 +511,10 @@ const showTel = () => {
   alert(person.tel);
 };
 </script>
-
 ```
 
-
 ## computed
+
 作用：根据已有数据计算出新数据（和`Vue2`中的`computed`作用一致）。
 
 ```vue
@@ -519,13 +536,12 @@ let fullName = computed(() => {
   return firstName.value + "-" + lastName.value;
 });
 </script>
-
 ```
 
 ![](../../public/img/Snipaste_2025-03-12_22-20-49.png)
 
+若想直接修改 fullName，是不可以的，这么定义的 fullName 是一个计算属性，且是只读的
 
-若想直接修改fullName，是不可以的，这么定义的fullName是一个计算属性，且是只读的
 ```vue
 <template>
   <div class="person">
@@ -550,12 +566,12 @@ const updateFullName = () => {
   fullName.value = "liSi";
 };
 </script>
-
 ```
+
 ![](../../public/img/Snipaste_2025-03-12_22-38-22.png)
 ![](../../public/img/Snipaste_2025-03-12_22-27-15.png)
 
-这么定义的fullName是一个计算属性，可读可写
+这么定义的 fullName 是一个计算属性，可读可写
 
 ```vue
 <template>
@@ -590,12 +606,9 @@ const updateFullName = () => {
   fullName.value = "Li-Si";
 };
 </script>
-
 ```
 
 ![](../../public/img/1899836063048794112.gif)
-
-
 
 ## watch
 
@@ -610,8 +623,8 @@ const updateFullName = () => {
 我们在`Vue3`中使用`watch`的时候，通常会遇到以下几种情况：
 
 ### 情况一
-监视`ref`定义的【基本类型】数据：直接写数据名即可，监视的是其`value`值的改变。
 
+监视`ref`定义的【基本类型】数据：直接写数据名即可，监视的是其`value`值的改变。
 
 ```vue
 <template>
@@ -639,21 +652,21 @@ let stopWatch = watch(sum, (newValue, oldValue) => {
   }
 });
 </script>
-
 ```
+
 ![](../../public/img/Snipaste_2025-03-17_20-42-09.png)
 
 ### 情况二
+
 监视`ref`定义的【对象类型】数据：直接写数据名，监视的是对象的【地址值】，若想监视对象内部的数据，要手动开启深度监视。
 
 :::tip
 注意：
 
-* 若修改的是`ref`定义的对象中的属性，`newValue` 和 `oldValue` 都是新值，因为它们是同一个对象。
+- 若修改的是`ref`定义的对象中的属性，`newValue` 和 `oldValue` 都是新值，因为它们是同一个对象。
 
-* 若修改整个`ref`定义的对象，`newValue` 是新值， `oldValue` 是旧值，因为不是同一个对象了。
-:::
-
+- 若修改整个`ref`定义的对象，`newValue` 是新值， `oldValue` 是旧值，因为不是同一个对象了。
+  :::
 
 ```vue
 <template>
@@ -699,10 +712,8 @@ watch(
   { deep: true, immediate: true }
 );
 </script>
-
-
 ```
- 
+
 ### 情况三
 
 监视`reactive`定义的【对象类型】数据，且默认开启了深度监视。
@@ -745,7 +756,6 @@ watch(person, (newValue, oldValue) => {
   console.log("旧", oldValue);
 });
 </script>
-
 ```
 
 ### 情况四
@@ -818,7 +828,6 @@ watch(
   { deep: true }
 );
 </script>
-
 ```
 
 ### 情况五
@@ -877,21 +886,19 @@ watch(
   { deep: true }
 );
 </script>
-
 ```
 
 ## watchEffect
 
-* 官网：立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行该函数。
+- 官网：立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行该函数。
 
-* `watch`对比`watchEffect`
+- `watch`对比`watchEffect`
 
-   1. 都能监听响应式数据的变化，不同的是监听数据变化的方式不同
-  
-   2. `watch`：要明确指出监视的数据
-  
-   3. `watchEffect`：不用明确指出监视的数据（函数中用到哪些属性，那就监视哪些属性）。
+  1.  都能监听响应式数据的变化，不同的是监听数据变化的方式不同
 
+  2.  `watch`：要明确指出监视的数据
+
+  3.  `watchEffect`：不用明确指出监视的数据（函数中用到哪些属性，那就监视哪些属性）。
 
 ```vue
 <template>
@@ -934,22 +941,21 @@ const stopWatch = watchEffect(() => {
   }
 });
 </script>
-
 ```
 
-## 标签的ref属性
+## 标签的 ref 属性
 
-* 用在普通`DOM`标签上，获取的是`DOM`节点。
+- 用在普通`DOM`标签上，获取的是`DOM`节点。
 
-* 用在组件标签上，获取的是组件实例对象。
+- 用在组件标签上，获取的是组件实例对象。
 
-### ref放在标签上
+### ref 放在标签上
 
-> 拿的是**DOM元素**
+> 拿的是**DOM 元素**
 
 示例：
 
-这样写有问题，引用组件情况下，与其他页面的id重复了
+这样写有问题，引用组件情况下，与其他页面的 id 重复了
 
 ```vue [Person.vue]
 <template>
@@ -968,7 +974,6 @@ const showLog = () => {
   console.log(document.getElementById("title"));
 };
 </script>
-
 ```
 
 ```vue [App.vue]
@@ -985,13 +990,12 @@ defineOptions({
 });
 </script>
 <style scoped></style>
-
 ```
 
 ![123](../../public/img/Snipaste_2025-03-18_20-29-49.png)
 
+这样才是对的 ⬇️
 
-这样才是对的⬇️
 ```vue
 <template>
   <div class="person">
@@ -1019,18 +1023,16 @@ const showLog = () => {
   font-size: 12px;
 }
 </style>
-
 ```
-![](../../public/img/Snipaste_2025-03-18_20-45-08.png)
 
+![](../../public/img/Snipaste_2025-03-18_20-45-08.png)
 
 :::info
 ![](../../public/img/Snipaste_2025-03-18_20-40-21.png)
 `data-v-xxxx` 这个标记，是因为样式中有了`scoped`
 :::
 
-
-### ref放在组件身上
+### ref 放在组件身上
 
 > 拿的是组件**实例对象**
 
@@ -1071,7 +1073,6 @@ defineExpose({ num1, num2, num3 });
   font-size: 12px;
 }
 </style>
-
 ```
 
 ```vue [App.vue]
@@ -1099,10 +1100,7 @@ const showLog = () => {
 };
 </script>
 <style scoped></style>
-
 ```
-
-
 
 ![](../../public/img/Snipaste_2025-03-18_21-04-25.png)
 
@@ -1112,21 +1110,20 @@ const showLog = () => {
 `defineExpose`用于明确地暴露组件的属性或方法给父组件。默认情况下，使用 `<script setup>` 定义的组件是完全封闭的，即其内部的状态和方法对外部（父组件）是不可见的。如果你希望某些状态或方法能够被父组件访问，就需要使用 defineExpose。
 :::
 
-## ts接口、泛型、自定义类型
+## ts 接口、泛型、自定义类型
 
 ```ts [index.ts]
 // 定义一个接口，用于限制person对象的具体属性
 
 // 暴露方式： 1.默认暴露 2.分别暴露 3.统一暴露
 export interface PersonInter {
-    id: string;
-    name: string;
-    age: number;
+  id: string;
+  name: string;
+  age: number;
 }
 
 // 自定义类型
 export type Persons = Array<PersonInter>;
-
 ```
 
 ```vue [Person.vue]
@@ -1156,14 +1153,14 @@ let personList: Persons = [
   font-size: 12px;
 }
 </style>
-
 ```
 
 ## props
 
-<span class="marker-evy">**父传子** 简单demo</span>
+<span class="marker-evy">**父传子** 简单 demo</span>
 
 可理解为 父传给子一个`a`，值是`你好`
+
 ```vue [App.vue]
 <template>
   <Person a="你好" b="哈哈" />
@@ -1177,9 +1174,7 @@ defineOptions({
 });
 </script>
 <style scoped></style>
-
 ```
-
 
 ```vue [Person.vue]
 <template>
@@ -1202,21 +1197,19 @@ console.log(x.a);
 </script>
 
 <style scoped></style>
-
 ```
 
 ![](../../public/img/Snipaste_2025-03-18_21-49-34.png)
-
 
 ### 简单测试
 
 ![](../../public/img/Snipaste_2025-03-18_21-56-17.png)
 它的值是,被解析为：
 ![](../../public/img/Snipaste_2025-03-18_21-57-27.png)
-特例就是，ref不需要加冒号`:`
-
+特例就是，ref 不需要加冒号`:`
 
 **完整示例**
+
 ```vue [App.vue]
 <template>
   <Person :list="personList" />
@@ -1238,7 +1231,6 @@ let personList = reactive<Persons>([
 ]);
 </script>
 <style scoped></style>
-
 ```
 
 ```vue [Person.vue]
@@ -1273,26 +1265,26 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 </script>
 
 <style scoped></style>
-
 ```
 
 ### defineProps
 
 :::tip
-- 在vue3中，defineXXX是宏函数，宏函数不用引入可直接使用
+
+- 在 vue3 中，defineXXX 是宏函数，宏函数不用引入可直接使用
 
 - `defineProps`是 Vue 3 提供的一个编译时宏（compile-time macro）用于在 `<script setup>` 中声明和获取 props。当你需要从父组件向子组件传递数据时，你可以在子组件中使用 `defineProps` 来接收这些数据。
-:::
+  :::
 
 ## 生命周期
 
-* 概念：`Vue`组件实例在创建时要经历一系列的初始化步骤，在此过程中`Vue`会在合适的时机，调用特定的函数，从而让开发者有机会在特定阶段运行自己的代码，这些特定的函数统称为：生命周期钩子
+- 概念：`Vue`组件实例在创建时要经历一系列的初始化步骤，在此过程中`Vue`会在合适的时机，调用特定的函数，从而让开发者有机会在特定阶段运行自己的代码，这些特定的函数统称为：生命周期钩子
 
-* 规律：
+- 规律：
 
   > 生命周期整体分为四个阶段，分别是：**创建、挂载、更新、销毁**，每个阶段都有两个钩子，一前一后。
 
-* `Vue2`的生命周期
+- `Vue2`的生命周期
 
   > 创建阶段：`beforeCreate`、`created`
   >
@@ -1302,7 +1294,7 @@ withDefaults(defineProps<{ list?: Persons }>(), {
   >
   > 销毁阶段：`beforeDestroy`、`destroyed`
 
-* `Vue3`的生命周期
+- `Vue3`的生命周期
 
   > 创建阶段：`setup`
   >
@@ -1312,7 +1304,7 @@ withDefaults(defineProps<{ list?: Persons }>(), {
   >
   > 卸载阶段：`onBeforeUnmount`、`onUnmounted`
 
-* 常用的钩子：`onMounted`(挂载完毕)、`onUpdated`(更新完毕)、`onBeforeUnmount`(卸载之前)
+- 常用的钩子：`onMounted`(挂载完毕)、`onUpdated`(更新完毕)、`onBeforeUnmount`(卸载之前)
 
 <br>
 
@@ -1320,7 +1312,7 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 
 组件的生命周期
 
-**vue2生命周期：**
+**vue2 生命周期：**
 
 > 创建
 > 挂载
@@ -1329,13 +1321,9 @@ withDefaults(defineProps<{ list?: Persons }>(), {
 
 ![](../../public/img/Snipaste_2025-03-19_21-47-34.png)
 
-
-
-vue3生命周期
-
+vue3 生命周期
 
 ![](../../public/img/Snipaste_2025-03-19_21-56-30.png)
-
 
 <br>
 <span class="marker-evy">demo如下</span>
@@ -1396,7 +1384,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped></style>
-
 ```
 
 ```vue [App.vue]
@@ -1415,20 +1402,18 @@ defineOptions({
 let isShow = ref(true);
 </script>
 <style scoped></style>
-
 ```
 
 ![](../../public/img/1899836063048794112.gif)
 
-
-## 自定义hook
+## 自定义 hook
 
 - 什么是`hook`？—— 本质是一个函数，把`setup`函数中使用的`Composition API`进行了封装，类似于`vue2.x`中的`mixin`。
 
 - 自定义`hook`的优势：复用代码, 让`setup`中的逻辑更清楚易懂。
 
+如下代码，功能齐全但是，数据与方法比较混乱，可以使用 hook 进行改造
 
-如下代码，功能齐全但是，数据与方法比较混乱，可以使用hook进行改造
 ```vue [Person.vue]
 <template>
   <div class="person">
@@ -1483,12 +1468,12 @@ img {
   margin-right: 10px;
 }
 </style>
-
 ```
 
-创建hooks文件夹，将每个不同模块进行拆分，命名必须使用`useXXX`这种形式
+创建 hooks 文件夹，将每个不同模块进行拆分，命名必须使用`useXXX`这种形式
 
 改进过后
+
 ```vue [Person.vue]
 <template>
   <div class="person">
@@ -1523,48 +1508,46 @@ img {
   margin-right: 10px;
 }
 </style>
-
 ```
 
 ```ts [useDog.ts]
 import { reactive, onMounted } from "vue";
 import axios from "axios";
 export default () => {
-    // 钩子函数也是不影响使用的
-    onMounted(() => {
-        addDog();
-    });
+  // 钩子函数也是不影响使用的
+  onMounted(() => {
+    addDog();
+  });
 
-    let dogList = reactive([
-        "https://images.dog.ceo/breeds/pembroke/n02113023_7316.jpg",
-    ]);
+  let dogList = reactive([
+    "https://images.dog.ceo/breeds/pembroke/n02113023_7316.jpg",
+  ]);
 
-    const addDog = async () => {
-        try {
-            let result = await axios.get(
-                "https://dog.ceo/api/breed/pembroke/images/random"
-            );
-            dogList.push(result.data.message);
-            console.log(result.data.message);
-        } catch (error) {
-            alert(error);
-        }
-    };
-    return { dogList, addDog }
-}
+  const addDog = async () => {
+    try {
+      let result = await axios.get(
+        "https://dog.ceo/api/breed/pembroke/images/random"
+      );
+      dogList.push(result.data.message);
+      console.log(result.data.message);
+    } catch (error) {
+      alert(error);
+    }
+  };
+  return { dogList, addDog };
+};
 ```
 
 ```ts [useSum.ts]
 import { ref } from "vue";
 export default () => {
-    let sum = ref(0);
+  let sum = ref(0);
 
-    const sumAdd = () => {
-        sum.value += 1;
-    };
-    return { sum, sumAdd }
-}
-
+  const sumAdd = () => {
+    sum.value += 1;
+  };
+  return { sum, sumAdd };
+};
 ```
 
 ![](../../public/img/189983606304eryteryt.gif)
@@ -1575,7 +1558,7 @@ export default () => {
 
 路由安装
 
-``` 
+```
 npm i vue-router
 ```
 
@@ -1588,47 +1571,46 @@ npm i vue-router
 
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
-import About from "@/components/About.vue"
-import Home from "@/components/Home.vue"
-import News from "@/components/News.vue"
 
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-        {
-            path: "/home",
-            component: () => Home
-        },
-        {
-            path: "/about",
-            component: () => About
-        },
-        {
-            path: "/news",
-            component: () => News
-        },
-    ]
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/About.vue"),
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: () => import("../views/News.vue"),
+    },
+  ],
 });
 
 export default router;
 ```
 
 ```ts [main.ts]
-import './assets/main.css'
+import "./assets/main.css";
 
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
 // 引入路由器
-import router from './router'
+import router from "./router";
 
 // 创建一个应用
-const app = createApp(App)
+const app = createApp(App);
 // 使用路由器
-app.use(router)
+app.use(router);
 // 挂载整个应用到app容器中
-app.mount('#app')
-
+app.mount("#app");
 ```
 
 ```vue [App.vue]
@@ -1636,9 +1618,9 @@ app.mount('#app')
   <div>
     <h1>路由 示例</h1>
     <div class="navigate">
-      <RouterLink to="home" active-class="highlight">首页</RouterLink>
-      <RouterLink to="news" active-class="highlight">新闻</RouterLink>
-      <RouterLink to="about" active-class="highlight">关于</RouterLink>
+      <RouterLink to="/home" active-class="highlight">首页</RouterLink>
+      <RouterLink to="/news" active-class="highlight">新闻</RouterLink>
+      <RouterLink to="/about" active-class="highlight">关于</RouterLink>
     </div>
     <div class="main-content">
       <RouterView></RouterView>
@@ -1679,7 +1661,6 @@ defineOptions({
   border-radius: 20px;
 }
 </style>
-
 ```
 
 ![](../../public/img/189983604509820394.gif)
@@ -1696,10 +1677,10 @@ defineOptions({
 <br/>
 
 - 路由组件
-靠路由规则渲染出来的
+  靠路由规则渲染出来的
 
 - 一般组件
-亲手写标签出来的
+  亲手写标签出来的
 
 ![](../../public/img/Snipaste_2025-03-24_20-57-33.png)
 
@@ -1713,9 +1694,9 @@ defineOptions({
 
 ```ts
 const router = createRouter({
-	history:createWebHistory(), //history模式
-	/******/
-})
+  history: createWebHistory(), //history模式
+  /******/
+});
 ```
 
 2. `hash`模式
@@ -1726,19 +1707,19 @@ const router = createRouter({
 
 ```ts
 const router = createRouter({
-	history:createWebHashHistory(), //hash模式
-	/******/
-})
+  history: createWebHashHistory(), //hash模式
+  /******/
+});
 ```
 
-### to的两种写法
+### to 的两种写法
 
 ```vue
 <!-- 第一种：to的字符串写法 -->
 <router-link active-class="active" to="/home">主页</router-link>
 
 <!-- 第二种：to的对象写法 -->
-<router-link active-class="active" :to="{path:'/home'}">Home</router-link>
+<router-link active-class="active" :to="{ path: '/home' }">Home</router-link>
 ```
 
 ### 命名路由
@@ -1748,44 +1729,44 @@ const router = createRouter({
 
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
-import About from "@/views/About.vue"
-import Home from "@/views/Home.vue"
-import News from "@/views/News.vue"
+import About from "@/views/About.vue";
+import Home from "@/views/Home.vue";
+import News from "@/views/News.vue";
 
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
-        {
-            path: "/home",
-            component: () => Home
-        },
-        {
-            path: "/about",
-            component: () => About
-        },
-        {
-            name: 'xinwen',
-            path: "/news",
-            component: () => News
-        },
-    ]
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      component: () => Home,
+    },
+    {
+      path: "/about",
+      component: () => About,
+    },
+    {
+      name: "xinwen",
+      path: "/news",
+      component: () => News,
+    },
+  ],
 });
 
 export default router;
 ```
 
 ```vue
-<RouterLink :to="{name:'xinwen'}" active-class="highlight">新闻</RouterLink>
+<RouterLink :to="{ name: 'xinwen' }" active-class="highlight">新闻</RouterLink>
 ```
 
 ### 嵌套路由
 
-编写子路由
+编写子组件
 
-```vue
+```vue [Detail.vue]
 <template>
-  <h3>id：xxx</h3>
+  <h3>编号：xxx</h3>
   <h3>标题：xxx</h3>
   <h3>详情：xxx</h3>
 </template>
@@ -1793,55 +1774,56 @@ export default router;
 <script lang="ts" setup></script>
 
 <style scoped></style>
-
 ```
 
 配置路由规则，使用`children`配置项
 
-```ts
+```ts [index.ts]
 // 创建路由器，暴露出去
 
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
-import About from "@/views/About.vue"
-import Home from "@/views/Home.vue"
-import News from "@/views/News.vue"
-import Detail from "@/components/Detail.vue";
 
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("@/views/About.vue"),
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: () => import("@/views/News.vue"),
+      children: [
         {
-            path: "/home",
-            component: () => Home
+          path: "detail", // 子路由不用写 ‘/’
+          name: "detail",
+          component: () => import("@/components/Detail.vue"),
         },
-        {
-            path: "/about",
-            component: () => About
-        },
-        {
-            name: 'xinwen',
-            path: "/news",
-            component: () => News,
-            children: [
-                {
-                    path: "detail",
-                    component: Detail
-                }
-            ]
-        },
-    ]
+      ],
+    },
+  ],
 });
 
 export default router;
 ```
 
 跳转路由（记得要加完整路径）
-```vue
+
+```vue [News.vue]
 <template>
   <div class="newsList">
-    <RouterLink :to="{ path: '/news/detail' }" v-for="news in newsList">{{ news.title }}</RouterLink>
+    <RouterLink :to="{ path: '/news/detail' }" v-for="news in newsList">{{
+      news.title
+    }}</RouterLink>
   </div>
   <div class="news-detail">
     <RouterView></RouterView>
@@ -1874,7 +1856,7 @@ const newsList = reactive([
 </script>
 
 <style scoped>
-.newsList{
+.newsList {
   margin-left: 30px;
   float: left;
   width: 400px;
@@ -1884,23 +1866,21 @@ const newsList = reactive([
   display: block;
   margin-bottom: 20px;
 }
-.news-detail{
+.news-detail {
   width: 500px;
   height: 300px;
   border: 2px solid rgb(232, 193, 193);
   float: left;
   border-radius: 20px;
-  
 }
 </style>
-
 ```
 
 记得去`该`组件中预留一个`<router-view>`
 
-### 路由传参-query参数
+### 路由传参-query 参数
 
-第一种方式
+**第一种方式**
 
 ```vue [News.vue]
 <template>
@@ -1960,7 +1940,6 @@ const newsList = reactive([
   border-radius: 20px;
 }
 </style>
-
 ```
 
 ```vue [Detail.vue]
@@ -1983,7 +1962,6 @@ console.log("route", route);
 </script>
 
 <style scoped></style>
-
 ```
 
 **第二种方式**
@@ -2053,9 +2031,7 @@ const newsList = reactive([
   border-radius: 20px;
 }
 </style>
-
 ```
-
 
 ```vue [Detail.vue]
 <template>
@@ -2077,12 +2053,11 @@ console.log("route", route);
 </script>
 
 <style scoped></style>
-
 ```
 
 ![](../../public/img/189983604512356334fdd.gif)
 
-### params参数
+### params 参数
 
 **第一种方式**
 
@@ -2144,44 +2119,43 @@ const newsList = reactive([
   border-radius: 20px;
 }
 </style>
-
 ```
 
 ![](../../public/img/Snipaste_2025-03-25_22-22-53.png)
+
 ```ts [index.ts]
 // 创建路由器，暴露出去
 
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
-import About from "@/views/About.vue"
-import Home from "@/views/Home.vue"
-import News from "@/views/News.vue"
-import Detail from "@/components/Detail.vue";
 
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("@/views/About.vue"),
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: () => import("@/views/News.vue"),
+      children: [
         {
-            path: "/home",
-            component: () => Home
+          path: "detail/:id/:title/:content?", // 加? 表示可传可不传
+          name: "detail",
+          component: () => import("@/components/Detail.vue"),
         },
-        {
-            path: "/about",
-            component: () => About
-        },
-        {
-            name: 'xinwen',
-            path: "/news",
-            component: () => News,
-            children: [
-                {
-                    path: "detail/:id/:title/:content",
-                    component: Detail
-                }
-            ]
-        },
-    ]
+      ],
+    },
+  ],
 });
 
 export default router;
@@ -2207,7 +2181,6 @@ console.log("route", route);
 </script>
 
 <style scoped></style>
-
 ```
 
 **第二种方式**
@@ -2218,7 +2191,7 @@ console.log("route", route);
     <RouterLink
       v-for="news in newsList"
       :to="{
-        name: 'xinwen',
+        name: 'detail',
         params: {
           id: news.id,
           title: news.title,
@@ -2277,22 +2250,20 @@ const newsList = reactive([
   border-radius: 20px;
 }
 </style>
-
 ```
 
-
-
 :::warning
+
 1. 如果路由中有占位，但传参时没有传会报错，可以通过在路由中这样写：`path:'detail/:id/:title/:content?'` 添加`?`即可,配置参数必要性
 
 2. 传递`params`参数时，若使用`to`的对象写法，必须使用`name`配置项，不能用`path`，并且该写法不能传递数组和对象
 
 3. 传递`params`参数时，需要提前在规则中占位。
-:::
+   :::
 
-### 路由props配置
+### 路由 props 配置
 
-第一种写法:将路由收到的所有params参数作为props传给路由组件
+第一种写法:将路由收到的所有 params 参数作为 props 传给路由组件
 
 ```ts [index.ts]
 // 创建路由器，暴露出去
@@ -2300,32 +2271,34 @@ const newsList = reactive([
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
 
-
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("@/views/About.vue"),
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: () => import("@/views/News.vue"),
+      children: [
         {
-            path: "/home",
-            component: () => import('@/views/Home.vue')
+          path: "detail/:id/:title/:content?",
+          name: "detail",
+          component: () => import("@/components/Detail.vue"),
+          props: true,
         },
-        {
-            path: "/about",
-            component: () => import('@/views/About.vue')
-        },
-        {
-            name: 'xinwen',
-            path: "/news",
-            component: () => import('@/views/News.vue'),
-            children: [
-                {
-                    path: "detail/:id/:title/:content",
-                    component: () => import('@/components/Detail.vue'),
-                    props: true
-                }
-            ]
-        },
-    ]
+      ],
+    },
+  ],
 });
 
 export default router;
@@ -2345,16 +2318,13 @@ defineOptions({
   name: "Detail",
 });
 
-
 defineProps(["id", "title", "content"]);
 </script>
 
 <style scoped></style>
-
 ```
 
-
-**第二种写法**:函数写法，可以自己决定将什么作为props给路由组件
+**第二种写法**:函数写法，可以自己决定将什么作为 props 给路由组件
 
 ```ts [index.ts]
 // 创建路由器，暴露出去
@@ -2362,35 +2332,37 @@ defineProps(["id", "title", "content"]);
 // 1.引入crateRouter
 import { createRouter, createWebHashHistory } from "vue-router";
 
-
 // 2.创建路由器
 const router = createRouter({
-    history: createWebHashHistory(),
-    routes: [
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/home",
+      name: "home",
+      component: () => import("@/views/Home.vue"),
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("@/views/About.vue"),
+    },
+    {
+      path: "/news",
+      name: "news",
+      component: () => import("@/views/News.vue"),
+      children: [
         {
-            path: "/home",
-            component: () => import('@/views/Home.vue')
+          path: "detail",
+          name: "detail",
+          component: () => import("@/components/Detail.vue"),
+          // props: true,
+          props(route) {
+            return route.query;
+          },
         },
-        {
-            path: "/about",
-            component: () => import('@/views/About.vue')
-        },
-        {
-            name: 'xinwen',
-            path: "/news",
-            component: () => import('@/views/News.vue'),
-            children: [
-                {
-                    path: "detail/:id/:title/:content",
-                    component: () => import('@/components/Detail.vue'),
-                    // props: true
-                    props(route) {
-                        return route.query
-                    }
-                }
-            ]
-        },
-    ]
+      ],
+    },
+  ],
 });
 
 export default router;
@@ -2402,7 +2374,7 @@ export default router;
     <RouterLink
       v-for="news in newsList"
       :to="{
-        name: 'xinwen',
+        name: 'detail',
         query: {
           id: news.id,
           title: news.title,
@@ -2461,7 +2433,6 @@ const newsList = reactive([
   border-radius: 20px;
 }
 </style>
-
 ```
 
 ```vue [Detail.vue]
@@ -2480,32 +2451,29 @@ defineProps(["id", "title", "content"]);
 </script>
 
 <style scoped></style>
-
 ```
 
-**第三种写法**:对象写法，可以自己决定将什么作为props给路由组件
+**第三种写法**:对象写法，可以自己决定将什么作为 props 给路由组件
 
 这种写法只能写死，没有什么意义
+
 ```ts
 children: [
-            {
-                path: "detail/:id/:title/:content",
-                component: () => import('@/components/Detail.vue'),
-                // props: true
-                // props(route) {
-                //     return route.query
-                // }
-                props: {
-                    x: 1,
-                    y: 2,
-                    z: 3
-                }
-            }
-        ]
+  {
+    path: "detail/:id/:title/:content",
+    component: () => import("@/components/Detail.vue"),
+    // props: true
+    // props(route) {
+    //     return route.query
+    // }
+    props: {
+      x: 1,
+      y: 2,
+      z: 3,
+    },
+  },
+];
 ```
-
-
-
 
 
 ---
@@ -2553,4 +2521,295 @@ onMounted(() => {
 
 ```
 
+实现点击按钮也可查看新闻详情⬇️
 
+```vue [News.vue]
+<template>
+  <div class="newsList" v-for="news in newsList">
+    <button @click="showDetail(news)">查看</button>
+    <RouterLink
+      :to="{
+        name: 'detail',
+        params: {
+          id: news.id,
+          title: news.title,
+          content: news.content,
+        },
+      }"
+      >{{ news.title }}</RouterLink
+    >
+  </div>
+  <div class="news-detail">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { reactive } from "vue";
+import { useRouter } from "vue-router";
+
+const newsList = reactive([
+  {
+    id: "1904165055277039616",
+    title: "海关总署就芬太尼相关问题答记者问",
+    content:
+      "海关总署有关负责人：《麻醉药品品种目录》（2013年版）里面列管的阿芬太尼、芬太尼、瑞芬太尼、舒芬太尼等具有药品属性的芬太尼按照麻醉药品管理。",
+  },
+  {
+    id: "1904165055281233920",
+    title: "NASA“撤回”登月宇航员“多元化”承诺",
+    content:
+      "今日俄罗斯电视台网站3月23日报道，美国国家航空航天局（NASA）收回其公开承诺，即在阿耳忒弥斯登月计划下，将第一位女性和第一位有色人种送上月球。",
+  },
+  {
+    id: "1904165055281233921",
+    title: "春天是最懂氛围感的",
+    content:
+      "春暖花开，春意融融。近日，北京各大公园里的春天已藏不住了，当古建与春天相遇，一场跨越时空的浪漫邂逅开启。人勤春早，收藏这组壁纸，新的一周，一起与美好同行",
+  },
+]);
+let router = useRouter();
+
+interface NewsInter {
+  id: string;
+  title: string;
+  content: string;
+}
+const showDetail = (news: NewsInter) => {
+  // 或者router.replace
+  router.push({
+    name: "detail",
+    params: {
+      id: news.id,
+      title: news.title,
+      content: news.content,
+    },
+  });
+};
+</script>
+
+<style scoped>
+.newsList {
+  margin-left: 30px;
+  float: left;
+  width: 400px;
+}
+.newsList a {
+  margin-right: 20px;
+  display: block;
+  margin-bottom: 20px;
+}
+.news-detail {
+  width: 500px;
+  height: 300px;
+  border: 2px solid rgb(232, 193, 193);
+  float: left;
+  border-radius: 20px;
+}
+</style>
+
+```
+
+```ts [index.ts]
+// 创建路由器，暴露出去
+
+// 1.引入crateRouter
+import { createRouter, createWebHashHistory } from "vue-router";
+
+
+// 2.创建路由器
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: [
+        {
+            name:'home',
+            path: "/home",
+            component: () => import('@/views/Home.vue')
+        },
+        {
+            name:'about',
+            path: "/about",
+            component: () => import('@/views/About.vue')
+        },
+        {
+            name: 'news',
+            path: "/news",
+            component: () => import('@/views/News.vue'),
+            children: [
+                {
+                    name: 'detail',
+                    path: "detail/:id/:title/:content",
+                    component: () => import('@/components/Detail.vue'),
+                    props: true
+                    // props(route) {
+                    //     return route.query
+                    // }
+                    // props: {
+                    //     x: 1,
+                    //     y: 2,
+                    //     z: 3
+                    // }
+                }
+            ]
+        },
+    ]
+});
+
+export default router;
+```
+
+```vue [Detail.vue]
+<template>
+  <h3>编号：{{ id }}</h3>
+  <h3>标题：{{ title }}</h3>
+  <h3>详情：{{ content }}</h3>
+</template>
+
+<script lang="ts" setup>
+defineOptions({
+  name: "Detail",
+});
+
+defineProps(["id", "title", "content"]);
+</script>
+
+<style scoped></style>
+
+```
+
+### 重定向
+
+1. 作用：将特定的路径，重新定向到已有路由。
+
+2. 具体编码：
+
+```ts
+routes: [
+        {
+            path: "/",
+            redirect: '/home'
+        },
+]
+```
+
+## Pinia
+
+### 简单搭建
+
+安装个`nanoid`
+
+```
+npm i nanoid
+```
+
+```vue [Count.vue]
+<template>
+  <div class="outer">
+    <div>当前求和：{{ sum }}</div>
+    <div>
+      <select v-model.number="n">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      <button @click="add">加</button>
+      <button @click="subtraction">减</button>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref } from "vue";
+
+defineOptions({
+  name: "Count",
+});
+
+let sum = ref(0);
+let n = ref(1);
+
+const add = () => {
+  sum.value += n.value;
+};
+
+const subtraction = () => {
+  sum.value -= n.value;
+};
+</script>
+
+<style scoped>
+.outer {
+  height: 250px;
+  width: 700px;
+  border: 1px solid rebeccapurple;
+}
+</style>
+
+```
+
+```vue [LoveTalk.vue]
+<template>
+    <div class="talk">
+        <button @click="getTalk">获取一句话</button>
+        <div>
+            <ul>
+                <li v-for="word in talkList">{{ word.title }}</li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import axios from "axios";
+import { reactive, ref } from "vue";
+import { nanoid } from 'nanoid'
+
+let talkList = reactive([{ id: "001", title: "广厦千间，夜眠仅需六尺；家财万贯，日食不过三餐。" }])
+
+const getTalk = async () => {
+    let { data } = await axios.get("https://api.vvhan.com/api/ian/rand");
+    console.log(data);
+    let obj = { id: nanoid(), title: data };
+    talkList.unshift(obj);
+};
+</script>
+
+```
+
+```vue [App.vue]
+<template>
+  <Count></Count>
+  <LoveTalk></LoveTalk>
+</template>
+
+<script setup lang="ts">
+import Count from "./components/Count.vue";
+import LoveTalk from "./components/LoveTalk.vue";
+
+defineOptions({
+  name: "App",
+});
+</script>
+
+
+<style scoped>
+
+</style>
+
+```
+
+
+### 搭建Pinia
+
+```
+npm i pinia
+```
+
+在`main.ts`
+
+```ts [main.ts]
+import { createPinia } from 'pinia'
+
+const pinia = createPinia();
+app.use(pinia)
+```
