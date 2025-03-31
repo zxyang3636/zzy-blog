@@ -2813,3 +2813,122 @@ import { createPinia } from 'pinia'
 const pinia = createPinia();
 app.use(pinia)
 ```
+
+
+### 存储+读取数据
+
+**命名注意**
+
+命名最好相相呼应
+![alt text](../../public/img/1906693801527738368.png)
+
+<br>
+
+store中定义的数据不用`.value`，因为它是包在`reactive`中的
+![](../../public/img/1906696710827016192.png)
+
+```ts [count.ts]
+import { defineStore } from "pinia";
+
+export const useCountStore = defineStore('count', {
+    state() {
+        return {
+            sum: 666
+        }
+    }
+});
+```
+
+```ts [loveTalk.ts]
+import { defineStore } from "pinia";
+
+export const useLoveTalkStore = defineStore('loveTalk', {
+    state() {
+        return {
+            talkList: [{ id: "001", title: "广厦千间，夜眠仅需六尺；家财万贯，日食不过三餐。" }]
+        }
+    }
+});
+```
+
+```vue [Count.vue]
+<template>
+  <div class="outer">
+    <div>当前求和：{{ countStore.sum }}</div>
+    <div>
+      <select v-model.number="n">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      <button @click="add">加</button>
+      <button @click="subtraction">减</button>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref } from "vue";
+
+import { useCountStore } from '@/store/count'
+
+defineOptions({
+  name: "Count",
+});
+
+let countStore = useCountStore();
+let n = ref(1);
+
+const add = () => {
+  // sum.value += n.value;
+};
+
+const subtraction = () => {
+  // sum.value -= n.value;
+};
+</script>
+
+<style scoped>
+.outer {
+  height: 250px;
+  width: 700px;
+  border: 1px solid rebeccapurple;
+}
+</style>
+
+```
+
+```vue [LoveTalk.vue]
+<template>
+    <div class="talk">
+        <button @click="getTalk">获取一句话</button>
+        <div>
+            <ul>
+                <li v-for="word in talkList.talkList">{{ word.title }}</li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import axios from "axios";
+import { reactive, ref } from "vue";
+import { nanoid } from 'nanoid'
+import { useLoveTalkStore } from '@/store/loveTalk'
+
+
+let talkList = useLoveTalkStore();
+console.log(talkList);
+
+const getTalk = async () => {
+    // let { data } = await axios.get("https://api.vvhan.com/api/ian/rand");
+    // console.log(data);
+    // let obj = { id: nanoid(), title: data };
+    // talkList.unshift(obj);
+};
+</script>
+
+```
+
+### 修改数据三种方式
+
