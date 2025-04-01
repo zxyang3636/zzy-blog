@@ -2932,3 +2932,177 @@ const getTalk = async () => {
 
 ### 修改数据三种方式
 
+**方式1**
+
+```ts
+const add = () => {
+  // 第一种修改方式
+   countStore.sum += n.value;
+};
+```
+
+**方式2**
+批量修改数据
+```ts
+const add = () => {
+   第二种
+   countStore.$patch({
+     sum: 2,
+     position: '河北'
+   })
+
+};
+```
+
+**方式3**
+
+```ts
+const add = () => {
+    // 第三种
+  countStore.increase(n.value);
+};
+```
+
+```ts [Count.ts]
+import { defineStore } from "pinia";
+
+export const useCountStore = defineStore('count', {
+    // 真正存储数据的地方
+    state() {
+        return {
+            sum: 666,
+            position: '北京'
+        }
+    },
+    // actions里面放置的是一个一个的方法，用于响应组件中的“动作”
+    actions: {
+        increase(value: number) {
+            // 修改数据（this是当前的store）
+            this.sum += value;
+        }
+    }
+});
+```
+
+### storeToRefs
+- 借助`storeToRefs`将`store`中的数据转为`ref`对象，方便在模板中使用。
+- 注意：`pinia`提供的`storeToRefs`只会将数据做转换，而`Vue`的`toRefs`会转换`store`中所有数据（包括方法）。
+
+```vue
+<template>
+  <div class="outer">
+    <div>当前求和：{{ sum }}</div>
+    <div>位置：{{ position }}</div>
+    <div>
+      <select v-model.number="n">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      <button @click="add">加</button>
+      <button @click="subtraction">减</button>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref } from "vue";
+import { useCountStore } from '@/store/count'
+import { storeToRefs } from "pinia";
+
+defineOptions({
+  name: "Count",
+});
+
+let countStore = useCountStore();
+let { sum, position } = storeToRefs(countStore);
+let n = ref(1);
+
+const add = () => {
+  countStore.increase(n.value);
+};
+
+const subtraction = () => {
+  sum.value -= n.value;
+};
+</script>
+
+<style scoped>
+.outer {
+  height: 250px;
+  width: 700px;
+  border: 1px solid rebeccapurple;
+}
+</style>
+
+```
+
+```ts [count.ts]
+import { defineStore } from "pinia";
+
+export const useCountStore = defineStore('count', {
+    // 真正存储数据的地方
+    state() {
+        return {
+            sum: 666,
+            position: '北京'
+        }
+    },
+    // actions里面放置的是一个一个的方法，用于响应组件中的“动作”
+    actions: {
+        increase(value: number) {
+            // 修改数据（this是当前的store）
+            this.sum += value;
+        }
+    }
+});
+```
+
+```vue [LoveTalk.vue]
+<template>
+    <div class="talk">
+        <button @click="getTalk">获取一句话</button>
+        <div>
+            <ul>
+                <li v-for="word in talkList">{{ word.title }}</li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<script lang="ts" setup>
+import { storeToRefs } from "pinia";
+import { useLoveTalkStore } from '@/store/loveTalk'
+
+
+let talkListStore = useLoveTalkStore();
+let { talkList } = storeToRefs(talkListStore);
+
+function getTalk() {
+    talkListStore.getTalk();
+}
+</script>
+
+```
+
+```ts [loveTalk.ts]
+import axios from "axios";
+import { nanoid } from "nanoid";
+import { defineStore } from "pinia";
+
+export const useLoveTalkStore = defineStore('loveTalk', {
+    state() {
+        return {
+            talkList: [{ id: "001", title: "广厦千间，夜眠仅需六尺；家财万贯，日食不过三餐。" }]
+        }
+    },
+    actions: {
+        async getTalk() {
+            let { data } = await axios.get("https://api.vvhan.com/api/ian/rand");
+            console.log(data);
+            let obj = { id: nanoid(), title: data };
+            this.talkList.unshift(obj);
+        }
+    }
+});
+```
