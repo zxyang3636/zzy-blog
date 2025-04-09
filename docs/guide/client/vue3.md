@@ -3364,3 +3364,298 @@ export const useLoveTalkStore = defineStore('loveTalk', () => {
 </style>
 
 ```
+
+### 方式2 自定义事件
+
+1. 概述：自定义事件常用于：**子 => 父。**
+2. 注意区分好：原生事件、自定义事件。
+
+- 原生事件：
+  - 事件名是特定的（`click`、`mosueenter`等等）	
+  - 事件对象`$event`: 是包含事件相关信息的对象（`pageX`、`pageY`、`target`、`keyCode`）
+- 自定义事件：
+  - 事件名是任意名称
+  - <strong style="color:red">事件对象`$event`: 是调用`emit`时所提供的数据，可以是任意类型！！！</strong >
+
+简单demo，组件挂载3秒后触发事件
+
+```vue
+<template>
+	<div class="father">
+		<h3>父组件</h3>
+		<!-- 给子组件Child绑定haha事件 -->
+		<Child @haha="xyz" />
+	</div>
+</template>
+
+<script setup lang="ts" name="Father">
+import Child from './Child.vue'
+import { ref } from "vue";
+
+function xyz() {
+	console.log('xyz');
+
+}
+
+</script>
+
+<style scoped>
+.father {
+	background-color: rgb(165, 164, 164);
+	padding: 20px;
+	border-radius: 10px;
+}
+
+.father button {
+	margin-right: 5px;
+}
+</style>
+```
+
+```vue
+<template>
+	<div class="child">
+		<h3>子组件</h3>
+		<h5>玩具：{{ toy }}</h5>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child">
+import { ref, onMounted } from "vue";
+let toy = ref('奥特曼')
+
+onMounted(() => {
+	setTimeout(() => {
+		emit('haha');
+	}, 3000);
+})
+
+// 声明事件
+let emit = defineEmits(['haha'])
+</script>
+
+<style scoped>
+.child {
+	margin-top: 10px;
+	background-color: rgb(76, 209, 76);
+	padding: 10px;
+	box-shadow: 0 0 10px black;
+	border-radius: 10px;
+}
+</style>
+```
+
+---
+
+点击触发
+```vue
+<template>
+	<div class="father">
+		<h3>父组件</h3>
+		<h5 v-show="toy">父收到子：{{ toy }}</h5>
+		<!-- 给子组件Child绑定haha事件 -->
+		<Child @get-toy="saveToy" />
+	</div>
+</template>
+
+<script setup lang="ts" name="Father">
+import Child from './Child.vue'
+import { ref } from "vue";
+
+let toy = ref('')
+
+function saveToy(value: string) {
+	toy.value = value;
+}
+
+</script>
+
+<style scoped>
+.father {
+	background-color: rgb(165, 164, 164);
+	padding: 20px;
+	border-radius: 10px;
+}
+
+.father button {
+	margin-right: 5px;
+}
+</style>
+
+```
+
+```vue
+<template>
+	<div class="child">
+		<h3>子组件</h3>
+		<h5>玩具：{{ toy }}</h5>
+		<button @click="emit('get-toy', toy)">测试</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child">
+import { ref, onMounted } from "vue";
+let toy = ref('奥特曼')
+
+// 声明事件
+let emit = defineEmits(['get-toy'])
+</script>
+
+<style scoped>
+.child {
+	margin-top: 10px;
+	background-color: rgb(76, 209, 76);
+	padding: 10px;
+	box-shadow: 0 0 10px black;
+	border-radius: 10px;
+}
+</style>
+```
+
+:::tip
+在自定义事件中，vue官方推荐**get-toy**这种命名方式
+:::
+
+---
+
+### 方式3 mitt
+
+概述：与消息订阅与发布（`pubsub`）功能类似，可以实现任意组件间通信。
+
+
+安装`mitt`
+
+```
+npm i mitt
+```
+
+简单demo,在utils下创建
+```ts [emitter.ts]
+// 引入mitt
+import mitt from 'mitt'
+
+// 调用mitt得到emitter，emitter能：绑定事件、触发事件
+const emitter = mitt()
+
+emitter.on('test1', () => {
+  console.log('test1被触发了');
+})
+
+emitter.on('test2', () => {
+  console.log('test2被触发了');
+})
+
+setInterval(() => {
+  // 触发事件
+  emitter.emit('test1');
+  emitter.emit('test2');
+}, 1000);
+
+
+setInterval(() => {
+  // emitter.off('test1')
+  // emitter.off('test2')
+  emitter.all.clear();  // 全部解绑 清理事件
+}, 3000);
+
+// 暴露emitter
+export default emitter
+```
+
+```vue [Father.vue]
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <Child1/>
+    <Child2/>
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+  import Child1 from './Child1.vue'
+  import Child2 from './Child2.vue'
+</script>
+
+<style scoped>
+	.father{
+		background-color:rgb(165, 164, 164);
+		padding: 20px;
+    border-radius: 10px;
+	}
+  .father button{
+    margin-left: 5px;
+  }
+</style>
+```
+
+```vue [Child1.vue]
+<template>
+	<div class="child1">
+		<h3>子组件1</h3>
+		<h5>我的玩具:{{ toy }}</h5>
+		<button @click="emitter.emit('getToy', toy)">传给他</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child1">
+import { ref } from 'vue'
+import emitter from '@/utils/emitter';
+
+let toy = ref('奥特曼')
+
+</script>
+
+<style scoped>
+.child1 {
+	margin-top: 50px;
+	background-color: skyblue;
+	padding: 10px;
+	box-shadow: 0 0 10px black;
+	border-radius: 10px;
+}
+
+.child1 button {
+	margin-right: 10px;
+}
+</style>
+```
+
+```vue [Child2.vue]
+<template>
+	<div class="child2">
+		<h3>子组件2</h3>
+		<h5>我的电脑:{{ computer }}</h5>
+		<h5 v-show="toy">接收到：{{ toy }}</h5>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child2">
+import { ref, onUnmounted } from 'vue'
+import emitter from '@/utils/emitter';
+let toy = ref('')
+
+emitter.on("getToy", (value: any) => {
+	console.log(value);
+	toy.value = value
+})
+
+let computer = ref('联想');
+
+
+// 在组件卸载时解绑getToy事件
+onUnmounted(() => {
+	emitter.off('getToy')
+})
+</script>
+
+<style scoped>
+.child2 {
+	margin-top: 50px;
+	background-color: orange;
+	padding: 10px;
+	box-shadow: 0 0 10px black;
+	border-radius: 10px;
+}
+</style>
+```
+

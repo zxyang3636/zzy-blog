@@ -11,7 +11,7 @@ import xgplayer from "./components/xgplayer.vue";
 import { h } from "vue";
 import { useData } from "vitepress";
 import MNavLinks from "./components/MNavLinks.vue";
-import giscusTalk from "vitepress-plugin-comment-with-giscus";
+// import giscusTalk from "vitepress-plugin-comment-with-giscus";
 import { NProgress } from "nprogress-v2/dist/index.js"; // 进度条组件
 import "nprogress-v2/dist/index.css"; // 进度条样式
 import { inBrowser } from "vitepress";
@@ -53,29 +53,29 @@ export default {
   },
   setup() {
     // Get frontmatter and route
-    const { frontmatter } = useData();
+    // const { frontmatter } = useData();
     const route = useRoute();
 
     // giscus配置
-    giscusTalk(
-      {
-        repo: "zxyang3636/zzy-blog", //仓库
-        repoId: "R_kgDONtLu7Q", //仓库ID
-        category: "Announcements", // 讨论分类
-        categoryId: "DIC_kwDONtLu7c4CmQpx", //讨论分类ID
-        mapping: "pathname",
-        inputPosition: "bottom",
-        lang: "zh-CN",
-      },
-      {
-        frontmatter,
-        route,
-      },
-      //默认值为true，表示已启用，此参数可以忽略；
-      //如果为false，则表示未启用
-      //您可以使用“comment:true”序言在页面上单独启用它
-      true
-    );
+    // giscusTalk(
+    //   {
+    //     repo: "zxyang3636/zzy-blog", //仓库
+    //     repoId: "R_kgDONtLu7Q", //仓库ID
+    //     category: "Announcements", // 讨论分类
+    //     categoryId: "DIC_kwDONtLu7c4CmQpx", //讨论分类ID
+    //     mapping: "pathname",
+    //     inputPosition: "bottom",
+    //     lang: "zh-CN",
+    //   },
+    //   {
+    //     frontmatter,
+    //     route,
+    //   },
+    //   //默认值为true，表示已启用，此参数可以忽略；
+    //   //如果为false，则表示未启用
+    //   //您可以使用“comment:true”序言在页面上单独启用它
+    //   true
+    // );
     // const route = useRoute();
     const initZoom = () => {
       // mediumZoom('[data-zoomable]', { background: 'var(--vp-c-bg)' }); // 默认
