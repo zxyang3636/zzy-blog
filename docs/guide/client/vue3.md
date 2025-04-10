@@ -3659,3 +3659,222 @@ onUnmounted(() => {
 </style>
 ```
 
+
+### 方式4 $attrs
+
+1. 概述：`$attrs`用于实现**当前组件的父组件**，向**当前组件的子组件**通信（**祖→孙**）。
+
+2. 具体说明：`$attrs`是一个对象，包含所有父组件传入的标签属性。
+
+   >  注意：`$attrs`会自动排除`props`中声明的属性(可以认为声明过的 `props` 被子组件自己“消费”了)
+
+
+```vue{7}[Father.vue]
+<template>
+	<div class="father">
+		<h3>父组件</h3>
+		<h5>{{ a }}</h5>
+		<h5>{{ b }}</h5>
+		<h5>{{ c }}</h5>
+		<Child :a="a" :b="b" :c="c" :updateA="updateA"></Child>
+	</div>
+</template>
+
+<script setup lang="ts" name="Father">
+import Child from './Child.vue'
+import { ref } from 'vue'
+
+let a = ref(1);
+let b = ref(2);
+let c = ref(3);
+
+const updateA = (value: number) => {
+	a.value += value;
+}
+
+</script>
+
+<style scoped>
+.father {
+	background-color: rgb(165, 164, 164);
+	padding: 20px;
+	border-radius: 10px;
+}
+</style>
+
+```
+
+```vue{4}[Child.vue]
+<template>
+	<div class="child">
+		<h3>子组件</h3>
+		<GrandChild v-bind="$attrs"/>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child">
+	import GrandChild from './GrandChild.vue'
+</script>
+
+<style scoped>
+	.child{
+		margin-top: 20px;
+		background-color: skyblue;
+		padding: 20px;
+		border-radius: 10px;
+		box-shadow: 0 0 10px black;
+	}
+</style>
+```
+
+```vue{13,7}[GrandChild.vue]
+<template>
+	<div class="grand-child">
+		<h3>孙组件</h3>
+		<h5>{{ a }}</h5>
+		<h5>{{ b }}</h5>
+		<h5>{{ c }}</h5>
+		<button @click="updateA(6)">修改祖 A 值</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="GrandChild">
+
+defineProps(['a', 'b', 'c', 'updateA'])
+</script>
+
+<style scoped>
+.grand-child {
+	margin-top: 20px;
+	background-color: orange;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px black;
+}
+</style>
+```
+
+![](../../public/img/18998360451235986412.gif)
+
+### 方式5 $refs与$parent
+
+1. 概述：
+
+   * `$refs`用于 ：**父→子。**
+   * `$parent`用于：**子→父。**
+
+2. 原理如下：
+
+   | 属性      | 说明                                                     |
+   | --------- | -------------------------------------------------------- |
+   | `$refs`   | 值为对象，包含所有被`ref`属性标识的`DOM`元素或组件实例。 |
+   | `$parent` | 值为对象，当前组件的父组件实例对象。                     |
+
+```vue [Father.vue]
+<template>
+	<div class="father">
+		<h3>父组件</h3>
+		<h5>房产：{{ house }}</h5>
+		<button @click="addBook($refs)">增加书籍</button>
+		<Child1 ref="c1" />
+		<Child2 ref="c2" />
+	</div>
+</template>
+
+<script setup lang="ts" name="Father">
+import Child1 from './Child1.vue'
+import Child2 from './Child2.vue'
+import { ref, reactive } from "vue"
+
+let house = ref(3)
+
+const addBook = (refs: any) => {
+	for (let key in refs) {
+		refs[key].book += 3;
+	}
+}
+
+defineExpose({ house })
+</script>
+
+<style scoped>
+.father {
+	background-color: rgb(165, 164, 164);
+	padding: 20px;
+	border-radius: 10px;
+}
+
+.father button {
+	margin-bottom: 10px;
+	margin-left: 10px;
+}
+</style>
+
+```
+
+```vue [Child1.vue]
+<template>
+	<div class="child1">
+		<h3>子组件1</h3>
+		<h5>书籍：{{ book }}</h5>
+		<h5>玩具：{{ toy }}</h5>
+		<button @click="reduceProperty($parent)">房产干掉</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child1">
+import { ref } from "vue";
+let book = ref(3)
+let toy = ref('奥特曼')
+
+const reduceProperty = (parent: any) => {
+	parent.house -= 1;
+}
+
+
+defineExpose({ book, toy })
+</script>
+
+<style scoped>
+.child1 {
+	margin-top: 20px;
+	background-color: skyblue;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px black;
+}
+</style>
+
+```
+
+```vue [Child2.vue]
+<template>
+	<div class="child2">
+		<h3>子组件2</h3>
+		<h5>书籍：{{ book }}</h5>
+		<h5>电脑：{{ computer }}</h5>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child2">
+import { ref } from 'vue';
+
+let book = ref(6)
+let computer = ref('联想')
+
+defineExpose({ book, computer })
+</script>
+
+<style scoped>
+.child2 {
+	margin-top: 20px;
+	background-color: orange;
+	padding: 20px;
+	border-radius: 10px;
+	box-shadow: 0 0 10px black;
+}
+</style>
+
+```
+
+![](../../public/img/1910344507451244544.gif)
