@@ -3878,3 +3878,116 @@ defineExpose({ book, computer })
 ```
 
 ![](../../public/img/1910344507451244544.gif)
+
+
+---
+
+### 方式6 provide、inject
+
+1. 概述：实现**祖孙组件**直接通信
+
+2. 具体使用：
+
+   * 在祖先组件中通过`provide`配置向后代组件提供数据
+   * 在后代组件中通过`inject`配置来声明接收数据
+
+
+
+```vue [Father.vue]
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <h5>money:{{ money }}</h5>
+    <h5>car:{{ car.brand }}--价格：{{ car.price }}</h5>
+    <Child />
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+import { reactive, ref, provide } from 'vue';
+import Child from './Child.vue'
+
+let money = ref(100);
+
+let car = reactive({
+  brand: 'BMW',
+  price: 200
+})
+
+function reduceMoney(value: number) {
+  money.value -= value;
+}
+
+// 向后代提供数据
+provide('moneyContext', { money, reduceMoney })
+provide('car', car)
+
+</script>
+
+<style scoped>
+.father {
+  background-color: rgb(165, 164, 164);
+  padding: 20px;
+  border-radius: 10px;
+}
+</style>
+```
+
+```vue [GrandChild.vue]
+<template>
+  <div class="grand-child">
+    <h3>我是孙组件</h3>
+    <h5>{{ money }}</h5>
+    <h5>{{ y.brand }}--{{ y.price }}</h5>
+    <button @click="reduceMoney(6)">减钱</button>
+  </div>
+</template>
+
+<script setup lang="ts" name="GrandChild">
+import { inject } from 'vue';
+
+let { money, reduceMoney } = inject('moneyContext', { money: 0, reduceMoney: (param: number) => { } })
+let y = inject('car', { brand: 'BMW', price: 0 })
+
+
+</script>
+
+<style scoped>
+.grand-child {
+  background-color: orange;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px black;
+}
+</style>
+```
+
+```vue [Child.vue]
+<template>
+  <div class="child">
+    <h3>我是子组件</h3>
+    <GrandChild/>
+  </div>
+</template>
+
+<script setup lang="ts" name="Child">
+  import GrandChild from './GrandChild.vue'
+</script>
+
+<style scoped>
+  .child {
+    margin-top: 20px;
+    background-color: skyblue;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px black;
+  }
+</style>
+```
+
+![](../../public/img/1910693513142468608.gif)
+
+:::warning
+使用`provide`提供数据的时候，不要`.value` ,否则数据不是响应式的
+:::
+
