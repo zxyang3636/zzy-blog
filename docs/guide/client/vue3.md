@@ -3991,3 +3991,100 @@ let y = inject('car', { brand: 'BMW', price: 0 })
 使用`provide`提供数据的时候，不要`.value` ,否则数据不是响应式的
 :::
 
+
+## slot
+
+### 1.默认插槽
+
+```vue [Father.vue]
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <div class="content">
+      <Game title="游戏列表">
+        <ul>
+          <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+        </ul>
+      </Game>
+      <Game title="美食城市">
+        <img :src="imgUrl" alt="">
+      </Game>
+      <Game title="影视推荐">
+        <video :src="videoUrl" controls></video>
+      </Game>
+    </div>
+
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+import { reactive, ref } from "vue";
+import Game from "./Game.vue";
+import { nanoid } from "nanoid";
+
+let games = reactive([{
+  id: nanoid(),
+  name: "LOL"
+},
+{
+  id: nanoid(),
+  name: "王者农药"
+}])
+
+let imgUrl = ref("https://th.bing.com/th/id/R.6f2c45f0e1970f362d4cb5eab87727c2?rik=y5WZ1SI%2fQsLR%2fA&riu=http%3a%2f%2fimg.daimg.com%2fuploads%2fallimg%2f190325%2f1-1Z325231625.jpg&ehk=O4I2%2bCxYfa8flgaMO4bok8%2fOAc8lDH1fs8%2fhpgKoBZ0%3d&risl=&pid=ImgRaw&r=0")
+let videoUrl = ref("https://cdn.pixabay.com/video/2018/04/20/15711-266043576_large.mp4")
+</script>
+
+<style scoped>
+.father {
+  background-color: rgb(165, 164, 164);
+  padding: 20px;
+  border-radius: 10px;
+
+}
+
+.content {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+img,
+video {
+  width: 100%;
+}
+</style>
+```
+
+
+```vue [Game.vue]
+<template>
+  <div class="game">
+    <h2>{{ title }}</h2>
+    <slot>默认内容</slot>
+  </div>
+</template>
+
+<script setup lang="ts" name="Game">
+import { reactive } from 'vue'
+
+
+defineProps(['title'])
+</script>
+
+<style scoped>
+.game {
+  width: 200px;
+  height: 300px;
+  background-color: skyblue;
+  border-radius: 10px;
+  box-shadow: 0 0 10px;
+}
+
+h2 {
+  background-color: orange;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+</style>
+```
