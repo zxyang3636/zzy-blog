@@ -4088,3 +4088,227 @@ h2 {
 }
 </style>
 ```
+
+### 2.具名插槽
+
+```vue{26,29}[Father.vue]
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <div class="content">
+      <Game>
+        <template v-slot:s2>
+          <ul>
+            <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+          </ul>
+        </template>
+        <template v-slot:s1>
+          <h2>游戏列表</h2>
+        </template>
+      </Game>
+
+      <Game>
+        <template v-slot:s1>
+          <h2>美食城市</h2>
+        </template>
+        <template v-slot:s2>
+          <img :src="imgUrl" alt="">
+        </template>
+      </Game>
+
+      <Game>
+        <template #s2>
+          <video :src="videoUrl" controls></video>
+        </template>
+        <template #s1>
+          <h2>影视推荐</h2>
+        </template>
+      </Game>
+    </div>
+
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+import { reactive, ref } from "vue";
+import Game from "./Game.vue";
+import { nanoid } from "nanoid";
+
+let games = reactive([{
+  id: nanoid(),
+  name: "LOL"
+},
+{
+  id: nanoid(),
+  name: "王者农药"
+}])
+
+let imgUrl = ref("https://th.bing.com/th/id/R.6f2c45f0e1970f362d4cb5eab87727c2?rik=y5WZ1SI%2fQsLR%2fA&riu=http%3a%2f%2fimg.daimg.com%2fuploads%2fallimg%2f190325%2f1-1Z325231625.jpg&ehk=O4I2%2bCxYfa8flgaMO4bok8%2fOAc8lDH1fs8%2fhpgKoBZ0%3d&risl=&pid=ImgRaw&r=0")
+let videoUrl = ref("https://cdn.pixabay.com/video/2018/04/20/15711-266043576_large.mp4")
+</script>
+
+<style scoped>
+.father {
+  background-color: rgb(165, 164, 164);
+  padding: 20px;
+  border-radius: 10px;
+
+}
+
+.content {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+img,
+video {
+  width: 100%;
+}
+
+h2 {
+  background-color: orange;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+</style>
+```
+
+```vue [Game.vue]
+<template>
+  <div class="game">
+    <slot name="s1">默认内容</slot>
+    <slot name="s2">默认内容</slot>
+  </div>
+</template>
+
+<script setup lang="ts" name="Game">
+</script>
+
+<style scoped>
+.game {
+  width: 200px;
+  height: 300px;
+  background-color: skyblue;
+  border-radius: 10px;
+  box-shadow: 0 0 10px;
+}
+
+h2 {
+  background-color: orange;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+</style>
+```
+
+
+### 3.作用域插槽
+
+场景：数据在子那边，但根据数据生成的结构，却由父亲决定，
+
+```vue [Father.vue]
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <div class="content">
+      <Game>
+        <template v-slot:qwer="{ games, x }">
+          {{ x }}
+          <h2>游戏列表</h2>
+          <ul>
+            <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+          </ul>
+        </template>
+      </Game>
+
+      <Game>
+        <template #qwer="{ games }">
+          <h2>游戏列表</h2>
+          <ol>
+            <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+          </ol>
+        </template>
+      </Game>
+
+      <Game>
+        <template v-slot:qwer="{ games }">
+          <h2>游戏列表</h2>
+          <h4 v-for="g in games" :key="g.id">{{ g.name }}</h4>
+        </template>
+      </Game>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+import Game from "./Game.vue";
+</script>
+
+<style scoped>
+.father {
+  background-color: rgb(165, 164, 164);
+  padding: 20px;
+  border-radius: 10px;
+
+}
+
+.content {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+img,
+video {
+  width: 100%;
+}
+
+h2 {
+  background-color: orange;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+</style>
+```
+
+```vue [Game.vue]
+<template>
+  <div class="game">
+    <slot name="qwer" :games="gameList" x="Hello">默认内容</slot>
+  </div>
+</template>
+
+<script setup lang="ts" name="Game">
+import { nanoid } from 'nanoid';
+import { reactive } from 'vue';
+
+
+let gameList = reactive([{
+  id: nanoid(),
+  name: "LOL"
+},
+{
+  id: nanoid(),
+  name: "王者农药"
+}])
+</script>
+
+<style scoped>
+.game {
+  width: 200px;
+  height: 300px;
+  background-color: skyblue;
+  border-radius: 10px;
+  box-shadow: 0 0 10px;
+}
+
+h2 {
+  background-color: orange;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+}
+</style>
+```
