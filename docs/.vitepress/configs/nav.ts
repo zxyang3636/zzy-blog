@@ -6,8 +6,9 @@ export const nav: DefaultTheme.Config["nav"] = [
   {
     text: "后端",
     items: [
-      { text: "Java线程池", link: "/guide/server/javaThreadPool" },
-      { text: "SpringCloud", link: "/guide/server/springCloud" },
+      { text: "Java", link: "/guide/server/javaThreadPool" },
+      { text: "Docker", link: "/guide/server/docker" },
+      // { text: "SpringCloud", link: "/guide/server/springCloud" },
       {
         // 分组标题1
         text: "其他",

@@ -92,13 +92,22 @@ export default defineConfig({
         text: "后端",
         collapsed: false,
         items: [
-          { text: "Java线程池", link: "/guide/server/javaThreadPool" },
+          { text: "Java", link: "/guide/server/javaThreadPool" },
           { text: "xxl-job", link: "/guide/server/xxljob" },
           { text: "消息推送", link: "/guide/server/xiaoxi" },
           // { text: "快速上手", link: "/getting-started" },
           // { text: "配置", link: "/configuration" },
           // { text: "页面", link: "/page" },
           // { text: "Frontmatter", link: "/frontmatter" },
+        ],
+      },
+      {
+        //分组标题
+        text: "前端",
+        collapsed: false,
+        items: [
+          { text: "Vue", link: "/guide/client/vue3" },
+          // { text: "MySql", link: "/guide/server/mysqlMianshi" },
         ],
       },
       {
