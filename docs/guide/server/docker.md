@@ -306,3 +306,182 @@ systemctl enable docker
 # Docker容器开机自启
 docker update --restart=always [容器名/容器id]
 ```
+
+## 命令别名
+
+```Bash
+# 修改/root/.bashrc文件
+vi /root/.bashrc
+内容如下：
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias dps='docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}\t{{.Names}}"'
+alias dis='docker images'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+        . /etc/bashrc
+fi
+```
+
+然后，执行命令使别名生效
+```Bash
+source /root/.bashrc
+```
+
+## 数据卷
+
+容器是隔离环境，容器内程序的文件、配置、运行时产生的容器都在容器内部，我们要读写容器内的文件非常不方便。大家思考几个问题：
+- 如果要升级MySQL版本，需要销毁旧容器，那么数据岂不是跟着被销毁了？
+- MySQL、Nginx容器运行后，如果我要修改其中的某些配置该怎么办？
+- 我想要让Nginx代理我的静态资源怎么办？
+
+因此，容器提供程序的运行环境，但是程序运行产生的数据、程序运行依赖的配置都应该与容器解耦。
+
+**数据卷（volume）**是一个虚拟目录，是**容器内目录**与**宿主机目录**之间映射的桥梁。
+
+以Nginx为例，我们知道Nginx中有两个关键的目录：
+- html：放置一些静态资源
+- conf：放置配置文件
+如果我们要让Nginx代理我们的静态资源，最好是放到html目录；如果我们要修改Nginx的配置，最好是找到conf下的nginx.conf文件。
+但遗憾的是，容器运行的Nginx所有的文件都在容器内部。所以我们必须利用数据卷将两个目录与宿主机目录关联，方便我们操作。如图：
+
+![](../../public/img/Snipaste_2025-04-23_21-22-35.png)
+
+在上图中：
+- 我们创建了两个数据卷：`conf`、`html`
+- Nginx容器内部的conf目录和html目录分别与两个数据卷关联。
+- 而数据卷conf和html分别指向了宿主机的`/var/lib/docker/volumes/conf/_data`目录和`/var/lib/docker/volumes/html/_data`目录
+
+这样以来，容器内的conf和html目录就 与宿主机的conf和html目录关联起来，我们称为**挂载**。此时，我们操作宿主机的`/var/lib/docker/volumes/html/_data`就是在操作容器内的`/usr/share/nginx/html/_data`目录。只要我们将静态资源放入宿主机对应目录，就可以被Nginx代理了。
+
+:::tip
+`/var/lib/docker/volumes`这个目录就是默认的存放所有容器数据卷的目录，其下再根据数据卷名称创建新目录，格式为`/数据卷名/_data`。
+:::
+
+### 数据卷命令
+
+|命令|说明|
+|----|----|
+|docker volume create|创建数据卷
+|docker volume ls|查看所有数据卷
+|docker volume rm|删除指定数据卷
+|docker volume inspect|查看某个数据卷的详情
+|docker volume prune|清除数据卷
+
+注意：容器与数据卷的挂载要在创建容器时配置，对于创建好的容器，是不能设置数据卷的。而且**创建容器的过程中，数据卷会自动创建**。
+
+```Bash
+docker run -d --name nginx -p 80:80 -v html:/usr/share/nginx/html nginx
+
+
+docker volume ls
+
+
+[root@localhost ~]# docker volume ls
+DRIVER    VOLUME NAME
+local     html
+[root@localhost ~]# docker volume inspect html
+[
+    {
+        "CreatedAt": "2025-04-23T21:37:48+08:00",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/html/_data",
+        "Name": "html",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+
+[root@localhost ~]# cd /var/lib/docker/volumes/html/_data
+[root@localhost _data]# ls
+50x.html  index.html
+
+#进入容器内部，查看/usr/share/nginx/html目录内的文件是否变化
+docker exec -it nginx bash
+
+
+```
+
+
+### 总结
+
+**什么是数据卷?**
+- 数据卷是一个虚拟目录，它将宿主机目录映射到容器内目录，方便我们操作容器内文件，或者方便迁移容器产生的数据
+
+**如何挂载数据卷?**
+- 在创建容器时，利用-v数据卷名:容器内目录完成挂载
+
+- 容器创建时，如果发现挂载的数据卷不存在时，会自动创建
+
+**数据卷的常见命令有哪些?**
+
+- docker volume ls:查看数据卷
+- docker volumerm:删除数据卷
+- docker volumeinspect:查看数据卷详情
+- docker volume prune:删除未使用的数据卷
+
+
+### 挂载本地目录
+
+**mysql挂载**
+
+数据卷的目录结构较深，如果我们去操作数据卷目录会不太方便。在很多情况下，我们会直接将容器目录与宿主机指定目录挂载。挂载语法与数据卷类似：
+
+```Bash
+# 挂载本地目录
+-v 本地目录:容器内目录
+# 挂载本地文件
+-v 本地文件:容器内文件
+```
+
+注意：本地目录或文件必须以 / 或 ./开头，如果直接以名字开头，会被识别为数据卷名而非本地目录名。
+
+
+例如
+```
+-v mysql:/var/lib/mysql # 会被识别为一个数据卷叫mysql，运行时会自动创建这个数据卷
+-v ./mysql:/var/lib/mysql # 会被识别为当前目录下的mysql目录，运行时如果不存在会创建目录
+```
+
+mysql挂载位置
+
+- 挂载`/root/mysql/data`到容器内的`/var/lib/mysql`目录
+- 挂载`/root/mysql/init`到容器内的`/docker-entrypoint-initdb.d`目录（初始化的SQL脚本目录）
+- 挂载`/root/mysql/conf`到容器内的`/etc/mysql/conf.d`目录（这个是MySQL配置文件目录）
+
+init放`xxx.sql`，初始化时只会执行一次
+
+conf放`xxx.cnf`文件
+
+**本地目录挂载：**
+
+```Bash
+# 1.删除原来的MySQL容器
+docker rm -f mysql
+
+# 2.进入root目录
+cd ~
+
+# 3.创建并运行新mysql容器，挂载本地目录
+docker run -d \
+  --name mysql \
+  -p 3306:3306 \
+  -e TZ=Asia/Shanghai \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -v ./mysql/data:/var/lib/mysql \
+  -v ./mysql/conf:/etc/mysql/conf.d \
+  -v ./mysql/init:/docker-entrypoint-initdb.d \
+  mysql
+
+# 5.1.进入MySQL
+docker exec -it mysql mysql -uroot -p123
+# 5.2.查看编码表
+show variables like "%char%";
+```
