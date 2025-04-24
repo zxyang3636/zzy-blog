@@ -484,4 +484,313 @@ docker run -d \
 docker exec -it mysql mysql -uroot -p123
 # 5.2.查看编码表
 show variables like "%char%";
+
+# 查看数据库
+show databases;
+
+
+# 切换到xxx数据库
+use xxx;
+
+#查看表
+show tables;
+
+
 ```
+
+## 镜像
+
+**镜像结构**
+
+镜像之所以能让我们快速跨操作系统部署应用而忽略其运行环境、配置，就是因为镜像中包含了程序运行需要的系统函数库、环境、配置、依赖。
+
+因此，自定义镜像本质就是依次准备好程序运行的基础环境、依赖、应用本身、运行配置等文件，并且打包而成。
+
+那因此，我们打包镜像也是分成这么几步：
+- 准备Linux运行环境（java项目并不需要完整的操作系统，仅仅是基础运行环境即可）
+- 安装并配置JDK
+- 拷贝jar包
+- 配置启动脚本
+
+上述步骤中的每一次操作其实都是在生产一些文件（系统运行环境、函数库、配置最终都是磁盘文件），所以**镜像就是一堆文件的集合**。
+
+但需要注意的是，镜像文件不是随意堆放的，而是按照操作的步骤分层叠加而成，每一层形成的文件都会单独打包并标记一个唯一id，称为**Layer（层）**。这样，如果我们构建时用到的某些层其他人已经制作过，就可以直接拷贝使用这些层，而不用重复制作。
+
+例如，第一步中需要的Linux运行环境，通用性就很强，所以Docker官方就制作了这样的只包含Linux运行环境的镜像。我们在制作java镜像时，就无需重复制作，直接使用Docker官方提供的CentOS或Ubuntu镜像作为基础镜像。然后再搭建其它层即可，这样逐层搭建，最终整个Java项目的镜像结构如图所示：
+
+![](../../public/img/Snipaste_2025-04-24_20-41-46.png)
+
+
+### Dockerfile
+记录镜像结构的文件就称为Dockerfile，其对应的语法可以参考官方文档：
+https://docs.docker.com/engine/reference/builder/
+
+其中的语法比较多，比较常用的有：
+
+|指令|说明|示例|
+|------|------|-----|
+|FROM|指定基础镜像|`FROM centos:6`
+|ENV|设置环境变量，可在后面指令使用|`ENV key value`
+|COPY|拷贝本地文件到镜像的指定目录|`COPY ./xx.jar /tmp/app.jar`
+|RUN|执行Linux的shell命令，一般是安装过程的命令|`RUN yum install gcc`
+|EXPOSE|指定容器运行时监听的端口，是给镜像使用者看的|`EXPOSE 8080`
+|ENTRYPOINT|镜像中应用的启动命令，容器运行时调用|`ENTRYPOINT java -jar xx.jar`
+
+
+例如，要基于Ubuntu镜像来构建一个Java应用，其Dockerfile内容如下：
+
+```Dockerfile
+# 指定基础镜像
+FROM ubuntu:16.04
+# 配置环境变量，JDK的安装目录、容器内时区
+ENV JAVA_DIR=/usr/local
+ENV TZ=Asia/Shanghai
+# 拷贝jdk和java项目的包
+COPY ./jdk8.tar.gz $JAVA_DIR/
+COPY ./docker-demo.jar /tmp/app.jar
+# 设定时区
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 安装JDK
+RUN cd $JAVA_DIR \
+ && tar -xf ./jdk8.tar.gz \
+ && mv ./jdk1.8.0_144 ./java8
+# 配置环境变量
+ENV JAVA_HOME=$JAVA_DIR/java8
+ENV PATH=$PATH:$JAVA_HOME/bin
+# 指定项目监听的端口
+EXPOSE 8080
+# 入口，java项目的启动命令
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+以后我们会有很多很多java项目需要打包为镜像，他们都需要Linux系统环境、JDK环境这两层，只有上面的3层不同（因为jar包不同）。如果每次制作java镜像都重复制作前两层镜像，是不是很麻烦。
+
+所以，就有人提供了基础的系统加JDK环境，我们在此基础上制作java镜像，就可以省去JDK的配置了：
+![](../../public/img/Snipaste_2025-04-24_20-56-47.png)
+
+```Dockerfile
+# 基础镜像
+FROM openjdk:11.0-jre-buster
+# 设定时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 拷贝jar包
+COPY docker-demo.jar /app.jar
+# 入口
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+
+### 构建镜像
+
+**命令**
+```Bash
+# 进入镜像目录
+cd /root/demo
+# 开始构建
+docker build -t docker-demo:1.0 .
+```
+
+命令说明：
+- `docker build` : 就是构建一个docker镜像
+- `-t docker-demo:1.0` ：`-t`参数是指定镜像的名称（`repository`和`tag`）
+- ` .` : 最后的点是指构建时**Dockerfile所在路径**，由于我们进入了demo目录，所以指定的是`.`代表当前目录，也可以直接指定`Dockerfile`目录：
+
+```Bash
+# 直接指定Dockerfile目录
+docker build -t docker-demo:1.0 /root/demo
+```
+
+#### 示例
+上传我们写好的`Dockerfile`和`jar包`
+![Snipaste_2025-04-24_21-09-38.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/8add704a169a450caeb44bb3b169ef5d~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5byg5bCP6ZizXw==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjE2ODY3NTk4MzQyNjA3OCJ9&rk3s=e9ecf3d6&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1745592405&x-orig-sign=YoOr%2FaXMUzoq0wchMMbZef4JUYA%3D)
+
+```Dockerfile
+# 基础镜像
+FROM openjdk:11.0-jre-buster
+# 设定时区
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# 拷贝jar包
+COPY docker-demo.jar /app.jar
+# 入口
+ENTRYPOINT ["java", "-jar", "/app.jar"]
+```
+
+执行命令
+
+```Bash
+[root@localhost demo]# docker build -t docker-demo:1.0 .
+
+[+] Building 35.5s (8/8) FINISHED                                                             docker:default
+ => [internal] load build definition from Dockerfile                                                    0.0s
+ => => transferring dockerfile: 359B                                                                    0.0s
+ => [internal] load metadata for docker.io/library/openjdk:11.0-jre-buster                              9.7s
+ => [internal] load .dockerignore                                                                       0.0s
+ => => transferring context: 2B                                                                         0.0s
+ => [1/3] FROM docker.io/library/openjdk:11.0-jre-buster@sha256:569ba9252ddd693a29d39e81b3123481f308e  23.4s
+ => => resolve docker.io/library/openjdk:11.0-jre-buster@sha256:569ba9252ddd693a29d39e81b3123481f308eb  0.0s
+ => => sha256:4fe4e1c58b4af82939a918665dd1e7b5b636dd73c710b4bccb530edbb15470d2 7.86MB / 7.86MB         16.1s
+.........
+
+
+root@localhost demo]# docker images
+
+REPOSITORY            TAG       IMAGE ID       CREATED          SIZE
+docker-demo           1.0       678e0af7095e   32 seconds ago   315MB
+
+[root@localhost demo]# docker run -d --name dockerDemo -p 8080:8080 docker-demo:1.0
+
+364781fb488c583e3d2e59daaf7546a1975338851b29207d952d447f07634982
+[root@localhost demo]# dps
+CONTAINER ID   IMAGE             PORTS                                       STATUS         NAMES
+7e90d418321d   docker-demo:1.0   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   Up 3 seconds   dockerDemo
+[root@localhost demo]# curl localhost:8080/hello/count
+<h5>欢迎访问商城, 这是您第1次访问<h5>[root@localhost demo]#
+
+[root@localhost demo]# docker logs dockerDemo
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::               (v2.7.12)
+
+21:28:56  INFO 1 --- [           main] com.itheima.mp.MpDemoApplication         : Starting MpDemoApplication v0.0.1-SNAPSHOT using Java 11.0.16 on 7e90d418321d with PID 1 (/app.jar started by root in /)
+21:28:56 DEBUG 1 --- [           main] com.itheima.mp.MpDemoApplication         : Running with Spring Boot v2.7.12, Spring v5.3.27
+21:28:56  INFO 1 --- [           main] com.itheima.mp.MpDemoApplication         : No active profile set, falling back to 1 default profile: "default"
+21:28:58  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 8080 (http)
+21:28:58  INFO 1 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+21:28:58  INFO 1 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.75]
+21:28:58  INFO 1 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+21:28:58  INFO 1 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2075 ms
+21:28:59  INFO 1 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 8080 (http) with context path ''
+21:28:59  INFO 1 --- [           main] com.itheima.mp.MpDemoApplication         : Started MpDemoApplication in 4.308 seconds (JVM running for 4.953)
+21:29:03  INFO 1 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+21:29:03  INFO 1 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+21:29:03  INFO 1 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+[root@localhost demo]# 
+```
+
+### 总结
+镜像的结构是怎样的?
+
+- 镜像中包含了应用程序所需要的运行环境、函数库、配置、以及应用本身等各种文件，这些文件分层打包而成，
+
+Dockerfile是做什么的?
+
+- Dockerfile就是利用固定的指令来描述镜像的结构和构建过程，这样Docker才可以依次来构建镜像
+
+构建镜像的命令是什么?
+
+- docker build -t 镜像名 [Dockerfile目录]
+
+
+## 容器网络互联
+
+![image.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/b099c913d4fa4ea0a85abc0a306ae6a4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5byg5bCP6ZizXw==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjE2ODY3NTk4MzQyNjA3OCJ9&rk3s=e9ecf3d6&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1745592145&x-orig-sign=Q7bO5GpVie7JhSXabwT3JPUaOlI%3D)
+
+刚刚我们创建了一个Java项目的容器，而Java项目往往需要访问其它各种中间件，例如MySQL、Redis等。现在，我们的容器之间能否互相访问呢？我们来测试一下
+
+首先，我们查看下Nginx容器的详细信息，重点关注其中的网络IP地址：
+
+```Bash
+docker inspect nginx
+
+  "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "MacAddress": "02:42:ac:11:00:04",
+                    "NetworkID": "8bbc5fd1fe07fc2539250796feede9bb5c617c28b0f64521e9744b1ffb5cd8ea",
+                    "EndpointID": "4e20a441965ddedc5264bf9296546342448c4aeb965324eedff362293fa6c809",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.4",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DriverOpts": null,
+                    "DNSNames": null
+                }
+            }
+
+[root@localhost ~]# docker exec -it dockerDemo bash
+
+root@7e90d418321d:/# ping 172.17.0.4
+PING 172.17.0.4 (172.17.0.4) 56(84) bytes of data.
+64 bytes from 172.17.0.4: icmp_seq=1 ttl=64 time=0.286 ms
+64 bytes from 172.17.0.4: icmp_seq=2 ttl=64 time=0.085 ms
+64 bytes from 172.17.0.4: icmp_seq=3 ttl=64 time=0.092 ms
+64 bytes from 172.17.0.4: icmp_seq=4 ttl=64 time=0.087 ms
+
+
+```
+
+发现可以互联，没有问题。
+
+但是，容器的网络IP其实是一个虚拟的IP，其值并不固定与某一个容器绑定，如果我们在开发时写死某个IP，而在部署时很可能MySQL容器的IP会发生变化，连接会失败。
+
+所以，我们必须借助于docker的网络功能来解决这个问题，官方文档：https://docs.docker.com/engine/reference/commandline/network/
+
+**常见命令有：**
+|命令|说明|
+|----|-----|
+|`docker network create`|创建一个网络|
+|`docker network ls`|查看所有网络|
+|`docker network rm`|删除指定网络|
+|`docker network prune`|清除未使用的网络|
+|`docker network connect`|使指定容器连接加入某网络|
+|`docker network disconnect`|使指定容器连接离开某网络|
+|`docker network inspect`|查看网络详细信息|
+
+
+### 自定义网络
+
+```Bash
+# 1.首先通过命令创建一个网络
+docker network create customizeNetwork
+
+# 2.然后查看网络
+docker network ls
+# 结果：
+NETWORK ID     NAME      DRIVER    SCOPE
+639bc44d0a87   bridge    bridge    local
+403f16ec62a2   customizeNetwork     bridge    local
+0dc0f72a0fbb   host      host      local
+cd8d3e8df47b   none      null      local
+# 其中，除了customizeNetwork以外，其它都是默认的网络
+
+# 3.让dockerDemo和mysql都加入该网络，注意，在加入网络时可以通过--alias给容器起别名
+# 这样该网络内的其它容器可以用别名互相访问！
+# 3.1.mysql容器，指定别名为db，另外每一个容器都有一个别名是容器名
+docker network connect customizeNetwork mysql --alias db
+# 3.2.dockerDemo容器，也就是我们的java项目
+docker network connect customizeNetwork dockerDemo
+
+# 4.进入dockerDemo容器，尝试利用别名访问db
+# 4.1.进入容器
+docker exec -it dockerDemo bash
+# 4.2.用db别名访问
+ping db
+# 结果
+PING db (172.18.0.2) 56(84) bytes of data.
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=1 ttl=64 time=0.070 ms
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=2 ttl=64 time=0.056 ms
+# 4.3.用容器名访问
+ping mysql
+# 结果：
+PING mysql (172.18.0.2) 56(84) bytes of data.
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=1 ttl=64 time=0.044 ms
+64 bytes from mysql.hmall (172.18.0.2): icmp_seq=2 ttl=64 time=0.054 ms
+```
+
+现在无需记住IP地址也可以实现容器互联了。
+
+**总结：**
+- 在自定义网络中，可以给容器起多个别名，默认的别名是容器名本身
+- 在同一个自定义网络中的容器，可以通过别名互相访问
+
