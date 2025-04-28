@@ -566,7 +566,7 @@ ENTRYPOINT ["java", "-jar", "/app.jar"]
 以后我们会有很多很多java项目需要打包为镜像，他们都需要Linux系统环境、JDK环境这两层，只有上面的3层不同（因为jar包不同）。如果每次制作java镜像都重复制作前两层镜像，是不是很麻烦。
 
 所以，就有人提供了基础的系统加JDK环境，我们在此基础上制作java镜像，就可以省去JDK的配置了：
-![](../../public/img/Snipaste_2025-04-24_20-56-47.png)
+![image](https://s1.imagehub.cc/images/2025/04/27/bf57245388ee66c6cfa15e76bbb23bea.png)
 
 ```Dockerfile
 # 基础镜像
@@ -603,7 +603,7 @@ docker build -t docker-demo:1.0 /root/demo
 
 #### 示例
 上传我们写好的`Dockerfile`和`jar包`
-![Snipaste_2025-04-24_21-09-38.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/8add704a169a450caeb44bb3b169ef5d~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5byg5bCP6ZizXw==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjE2ODY3NTk4MzQyNjA3OCJ9&rk3s=e9ecf3d6&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1745592405&x-orig-sign=YoOr%2FaXMUzoq0wchMMbZef4JUYA%3D)
+![image](https://s1.imagehub.cc/images/2025/04/27/856e1e28b4f28f5ef1187a6a3c07372b.png)
 
 ```Dockerfile
 # 基础镜像
@@ -690,7 +690,7 @@ Dockerfile是做什么的?
 
 ## 容器网络互联
 
-![image.png](https://p0-xtjj-private.juejin.cn/tos-cn-i-73owjymdk6/b099c913d4fa4ea0a85abc0a306ae6a4~tplv-73owjymdk6-jj-mark-v1:0:0:0:0:5o6Y6YeR5oqA5pyv56S-5Yy6IEAg5byg5bCP6ZizXw==:q75.awebp?policy=eyJ2bSI6MywidWlkIjoiMjE2ODY3NTk4MzQyNjA3OCJ9&rk3s=e9ecf3d6&x-orig-authkey=f32326d3454f2ac7e96d3d06cdbb035152127018&x-orig-expires=1745592145&x-orig-sign=Q7bO5GpVie7JhSXabwT3JPUaOlI%3D)
+![image](https://s1.imagehub.cc/images/2025/04/27/f3aa579e539004c2e940eb4f34bd6002.png)
 
 刚刚我们创建了一个Java项目的容器，而Java项目往往需要访问其它各种中间件，例如MySQL、Redis等。现在，我们的容器之间能否互相访问呢？我们来测试一下
 
@@ -794,3 +794,284 @@ PING mysql (172.18.0.2) 56(84) bytes of data.
 - 在自定义网络中，可以给容器起多个别名，默认的别名是容器名本身
 - 在同一个自定义网络中的容器，可以通过别名互相访问
 
+
+
+## 部署项目
+
+上传我们的`jar包`和`Dockerfile`
+
+```Bash
+docker build -t 项目名:版本 .
+```
+
+### **网络**
+
+```Bash
+docker network create xxx-network
+
+docker network connect xxx-network mysql --alias db
+
+docker network connect xxxx-network nginx
+```
+
+
+### Mysql
+
+*挂载目录*
+
+`/root/mysql/conf`
+
+`/root/mysql/data`
+
+`/root/mysql/init`
+
+cnf文件:
+```  [xxx.cnf]
+[client]
+default_character_set=utf8mb4
+[mysql]
+default_character_set=utf8mb4
+[mysqld]
+character_set_server=utf8mb4
+collation_server=utf8mb4_unicode_ci
+init_connect='SET NAMES utf8mb4'
+```
+
+init是初始化文件:
+`xxx.sql`
+
+```Bash
+docker run -d \
+  --name mysql \
+  -p 3306:3306 \
+  -e TZ=Asia/Shanghai \
+  -e MYSQL_ROOT_PASSWORD=123 \
+  -v ./mysql/data:/var/lib/mysql \
+  -v ./mysql/conf:/etc/mysql/conf.d \
+  -v ./mysql/init:/docker-entrypoint-initdb.d \
+  --network hmall-network \
+  --restart always \
+  mysql:latest
+```
+
+
+
+### Nginx
+
+*创建挂载目录*
+
+`/root/nginx/html/`
+
+`/root/nginx/nginx.conf/`
+
+- 把`/root/nginx/nginx.conf`挂载到`/etc/nginx/nginx.conf`
+- 把`/root/nginx/html`挂载到`/usr/share/nginx/html`
+
+配置文件中，这里不要写死，用于容器之间互相通信
+![image](https://s1.imagehub.cc/images/2025/04/27/cc0397c00a235d59a1c9e787de4335b1.png)
+
+```[nginx.conf]
+
+worker_processes  1;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/json;
+
+    sendfile        on;
+    
+    keepalive_timeout  65;
+
+    server {
+        listen       18080;
+        # 指定前端项目所在的位置
+        location / {
+            root /usr/share/nginx/html/hmall-portal;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+        location /api {
+            rewrite /api/(.*)  /$1 break;
+            proxy_pass http://hmall:8080;
+        }
+    }
+    server {
+        listen       18081;
+        # 指定前端项目所在的位置
+        location / {
+            root /usr/share/nginx/html/hmall-admin;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+        location /api {
+            rewrite /api/(.*)  /$1 break;
+            proxy_pass http://hmall:8080;
+        }
+    }
+}
+
+```
+
+```Bash
+docker run -d \
+      --name nginx \
+      -p 80:80 \
+      -p 443:443 \
+      -v /root/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf \
+      -v /root/nginx/conf/nginx.conf:/etc/nginx/conf/nginx.conf \
+      -v /root/nginx/ssl:/etc/nginx/ssl \
+      -v /root/nginx/html:/usr/share/nginx/html \
+      -v /root/nginx/logs:/var/log/nginx \
+      --network xxx-network
+      --restart always \
+      nginx
+```
+
+```Bash
+docker run -d \
+  --name nginx \
+  -p 18080:18080 \
+  -p 18081:18081 \
+  -v /root/nginx/html:/usr/share/nginx/html \
+  -v /root/nginx/nginx.conf:/etc/nginx/nginx.conf \
+  --network hmall \
+  nginx
+```
+
+
+### Java
+```Bash
+docker run -d --name hm -p 8080:8080 --network xxx-network hmall
+```
+
+
+
+## DockerCompose
+
+Docker Compose就可以帮助我们实现**多个相互关联的Docker容器的快速部署**。它允许用户通过一个单独的 docker-compose.yml 模板文件（YAML 格式）来定义一组相关联的应用容器。
+
+
+**对比如下：**
+|docker run 参数|docker compose 指令|说明|
+|----|-----|----|
+|--name |   container_name|容器名称|
+|-p |   ports|端口映射|
+|-e |   environment|环境变量|
+|-v |   volumes|数据卷配置|
+|--network |   networks|网络|
+
+
+```
+hmall:
+  build:
+    context: .
+    dockerfile: Dockerfile
+```
+
+构建Java项目，意为在当前目录下的Dockerfile，进行构建
+
+
+```yaml [docker-compose.yaml]
+services:
+  mysql:
+    image: mysql
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - "./mysql/conf:/etc/mysql/conf.d"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/init:/docker-entrypoint-initdb.d"
+    networks:
+      - hmall-network
+  hmall:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: hmall
+    ports:
+      - "8080:8080"
+    networks:
+      - hmall-network
+    depends_on:
+      - mysql
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "18080:18080"
+      - "18081:18081"
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "./nginx/html:/usr/share/nginx/html"
+    depends_on:
+      - hmall
+    networks:
+      - hmall-network
+networks:
+  hmall-network:
+    driver: bridge
+```
+
+```Bash
+[root@localhost ~]# docker compose up -d
+
+[+] Building 0.2s (8/8) FINISHED                                                                   docker:default
+ => [hmall internal] load build definition from Dockerfile                                                   0.0s
+ => => transferring dockerfile: 358B                                                                         0.0s
+ => [hmall internal] load metadata for docker.io/library/openjdk:11.0-jre-buster                             0.0s
+ => [hmall internal] load .dockerignore                                                                      0.0s
+ => => transferring context: 2B                                                                              0.0s
+ => [hmall 1/3] FROM docker.io/library/openjdk:11.0-jre-buster                                               0.0s
+ => [hmall internal] load build context                                                                      0.0s
+ => => transferring context: 98B                                                                             0.0s
+ => CACHED [hmall 2/3] RUN ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo Asia/Shanghai >  0.0s
+ => CACHED [hmall 3/3] COPY hm-service.jar /app.jar                                                          0.0s
+ => [hmall] exporting to image                                                                               0.0s
+ => => exporting layers                                                                                      0.0s
+ => => writing image sha256:164bc4806232609ccf993f792dd31f00c5af7c1d51734487f2dce67a334fe87b                 0.0s
+ => => naming to docker.io/library/root-hmall                                                                0.0s
+[+] Running 4/4
+ ✔ Network root_hmall-network  Created                                                                       0.2s 
+ ✔ Container mysql             Started                                                                       0.8s 
+ ✔ Container hmall             Started                                                                       1.3s 
+ ✔ Container nginx             Started                                                                       2.0s 
+[root@localhost ~]# 
+```
+
+启动成功后，就会在镜像中自动生成root-hmall的镜像
+
+
+**命令**
+
+```Bash
+docker compose [OPTIONS] [COMMAND]
+```
+其中，OPTIONS和COMMAND都是可选参数，比较常见的有：
+
+| 类型       | 参数或指令 | 说明                                                                 |
+|------------|------------|----------------------------------------------------------------------|
+| **Options**| `-f`       | 指定 `compose` 文件的路径和名称                                           |
+|            | `-p`       | 指定项目名称。`project` 就是当前 `compose` 文件中设置的多个 `service` 的集合，是逻辑概念 |
+| **Commands**| `up`      | 创建并启动所有 `service` 容器                                             |
+|            | `down`     | 停止并移除所有容器、网络                                                   |
+|            | `ps`       | 列出所有启动的容器                                                         |
+|            | `logs`     | 查看指定容器的日志                                                         |
+|            | `stop`     | 停止容器                                                                 |
+|            | `start`    | 启动容器                                                                 |
+|            | `restart`  | 重启容器                                                                 |
+|            | `top`      | 查看运行的进程                                                             |
+|            | `exec`     | 在指定的运行中容器中执行命令                                               |

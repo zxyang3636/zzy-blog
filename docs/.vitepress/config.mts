@@ -93,6 +93,7 @@ export default defineConfig({
         collapsed: false,
         items: [
           { text: "Java", link: "/guide/server/javaThreadPool" },
+          { text: "SpringCloud", link: "/guide/server/springCloud" },
           { text: "xxl-job", link: "/guide/server/xxljob" },
           { text: "消息推送", link: "/guide/server/xiaoxi" },
           // { text: "快速上手", link: "/getting-started" },
