@@ -533,7 +533,7 @@ let fullName = computed(() => {
 </script>
 ```
 
-![](../../public/img/Snipaste_2025-03-12_22-20-49.png)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-03-12_22-20-49.png)
 
 若想直接修改 fullName，是不可以的，这么定义的 fullName 是一个计算属性，且是只读的
 
@@ -563,8 +563,8 @@ const updateFullName = () => {
 </script>
 ```
 
-![](../../public/img/Snipaste_2025-03-12_22-38-22.png)
-![](../../public/img/Snipaste_2025-03-12_22-27-15.png)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-03-12_22-38-22.png)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-03-12_22-27-15.png)
 
 这么定义的 fullName 是一个计算属性，可读可写
 
@@ -603,7 +603,7 @@ const updateFullName = () => {
 </script>
 ```
 
-![](../../public/img/1899836063048794112.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/1899836063048794112.gif)
 
 ## watch
 
@@ -649,7 +649,7 @@ let stopWatch = watch(sum, (newValue, oldValue) => {
 </script>
 ```
 
-![](../../public/img/Snipaste_2025-03-17_20-42-09.png)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-03-17_20-42-09.png)
 
 ### 情况二
 
@@ -987,7 +987,7 @@ defineOptions({
 <style scoped></style>
 ```
 
-![123](../../public/img/Snipaste_2025-03-18_20-29-49.png)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-03-18_20-29-49.png)
 
 这样才是对的 ⬇️
 
@@ -1399,7 +1399,6 @@ let isShow = ref(true);
 <style scoped></style>
 ```
 
-![](../../public/img/1899836063048794112.gif)
 
 ## 自定义 hook
 
@@ -1545,7 +1544,7 @@ export default () => {
 };
 ```
 
-![](../../public/img/189983606304eryteryt.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/189983606304eryteryt.gif)
 
 ## 路由
 
@@ -1658,7 +1657,7 @@ defineOptions({
 </style>
 ```
 
-![](../../public/img/189983604509820394.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/189983604509820394.gif)
 
 ---
 
@@ -2050,7 +2049,7 @@ console.log("route", route);
 <style scoped></style>
 ```
 
-![](../../public/img/189983604512356334fdd.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/189983604512356334fdd.gif)
 
 ### params 参数
 
@@ -3188,7 +3187,7 @@ const subtraction = () => {
 ```
 
 **效果**：
-![](../../public/img/18998360451235633123.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/18998360451235633123.gif)
 
 
 ### $subscribe
@@ -3749,7 +3748,7 @@ defineProps(['a', 'b', 'c', 'updateA'])
 </style>
 ```
 
-![](../../public/img/18998360451235986412.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/18998360451235986412.gif)
 
 ### 方式5 $refs与$parent
 
@@ -3872,7 +3871,7 @@ defineExpose({ book, computer })
 
 ```
 
-![](../../public/img/1910344507451244544.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/1910344507451244544.gif)
 
 
 ---
@@ -3980,7 +3979,7 @@ let y = inject('car', { brand: 'BMW', price: 0 })
 </style>
 ```
 
-![](../../public/img/1910693513142468608.gif)
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/1910693513142468608.gif)
 
 :::warning
 使用`provide`提供数据的时候，不要`.value` ,否则数据不是响应式的
