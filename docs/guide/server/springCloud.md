@@ -61,3 +61,58 @@ SpringCloud集成了各种微服务功能组件，并基于SpringBoot实现了�
 
 1. 独立Project
 2. Maven聚合
+
+## 服务调用
+
+把原本本地方法调用，改造成跨微服务的远程调用（RPC，即Remote Produce Call）。
+
+### RestTemplate
+Spring给我们提供了一个RestTemplate的API，可以方便的实现Http请求的发送。
+
+**使用步骤**
+
+```java
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+```
+
+```java
+@RequiredArgsConstructor
+
+
+private final RestTemplate restTemplate;
+```
+
+调用
+```java
+        ResponseEntity<List<ItemDTO>> response = restTemplate.exchange("http://localhost:8081/items?ids={ids}",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ItemDTO>>() {},
+                Map.of("ids", CollUtil.join(itemIds, ",")));
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            return;
+        }
+        List<ItemDTO> items = response.getBody();
+        if (CollUtils.isEmpty(items)) {
+            return;
+        }
+```
+
+参数分别是：
+- 请求路径
+- 请求方式
+- 请求实体
+- 返回值类型
+- 请求参数
+
+Java发送http请求可以使用Spring提供的RestTemplate，使用的基本步骤如下：
+- 注册RestTemplate到Spring容器
+- 调用RestTemplate的API发送请求，常见方法有：
+  - getForObject：发送Get请求并返回指定类型对象
+  - PostForObject：发送Post请求并返回指定类型对象
+  - put：发送PUT请求
+  - delete：发送Delete请求
+  - exchange：发送任意类型请求，返回ResponseEntity
