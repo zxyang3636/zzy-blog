@@ -394,3 +394,189 @@ feign替我们完成了服务拉取、负载均衡、发送http请求的所有�
 :::warning
 注意：负载均衡早期用的是**springCloud**里的`Ribbon`，现在新版本都是用`loadbalancer`
 :::
+
+
+### 连接池
+
+OpenFeiqn对Http请求做了优雅的伪装，不过其底层发起http请求，依赖于其它的框架。这些框架可以自己选择，包括以下三种:
+- HttpURLconnection:默认实现，不支持连接池
+- Apache HttpClient:支持连接池
+- OKHttp:支持连接池
+具体源码可以参考FeignBlockingLoadBalancerClient类中的delegate成员变量
+
+**使用步骤**
+
+1. 引入依赖
+```xml
+<!--OK http 的依赖 -->
+<dependency>
+  <groupId>io.github.openfeign</groupId>
+  <artifactId>feign-okhttp</artifactId>
+</dependency>
+```
+
+
+2. 开启连接池功能
+```yml
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp功能
+```
+重启服务，连接池就生效了。
+
+
+### 实践
+
+一个服务中的FeignClient需要被其他多个服务调用，我们就需要在每个不同服务中定义多个相同接口，这不是重复编码吗？ 有什么办法能加避免重复编码呢？
+
+避免重复编码的办法就是抽取。不过这里有两种抽取思路：
+- 思路1：抽取到微服务之外的公共module
+- 思路2：每个微服务自己抽取一个module
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-09_21-34-30.png)
+
+方案1抽取更加简单，工程结构也比较清晰，但缺点是整个项目耦合度偏高。
+
+方案2抽取相对麻烦，工程结构相对更复杂，但服务之间耦合度降低。
+
+**方案2步骤**
+
+
+抽取Feign客户端，新建一个moudule，`xxxx-api`
+
+该模块依赖如下
+```xml
+ <!--open feign-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+<!-- load balancer-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
+<!-- swagger 注解依赖 -->
+<dependency>
+    <groupId>io.swagger</groupId>
+    <artifactId>swagger-annotations</artifactId>
+    <version>1.6.6</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+把公共的客户端拷贝到该`xxxxx-api`模块
+
+
+
+现在，任何微服务要调用`公共的FeignClient`中的接口，只需要引入`xxxx-api`模块依赖即可，无需自己编写Feign客户端了。
+
+
+在其他服务中引入该api模块
+```xml
+  <!--feign模块-->
+  <dependency>
+      <groupId>com.heima</groupId>
+      <artifactId>hm-api</artifactId>
+      <version>1.0.0</version>
+  </dependency>
+```
+
+重启项目，发现报错了：
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-09_21-46-03.png)
+
+这里因为ItemClient现在定义到了com.hmall.api.client包下，而cart-service的启动类定义在com.hmall.cart包下，扫描不到ItemClient，所以报错了。
+
+解决办法很简单，在cart-service的启动类上添加声明即可，两种方式：
+
+- 方式1：声明扫描包：
+```java
+@EnableFeignClients(basePackages = "com.hmall.api.client")
+public class CartApplication {}
+```
+
+- 方式2：声明要用的FeignClient
+
+```java
+@EnableFeignClients(clients = {ItemClient.class})
+public class CartApplication {}
+```
+
+
+
+
+### 日志配置
+OpenFeign只会在FeignClient所在包的日志级别为DEBUG时，才会输出日志。而且其日志级别有4级:
+- NONE:不记录任何日志信息，这是默认值。
+- BASIC:仅记录请求的方法，URL以及响应状态码和执行时间
+- HEADERS:在BASIC的基础上，额外记录了请求和响应的头信息
+- FULL:记录所有请求和响应的明细，包括头信息、请求体、元数据。
+
+由于Feign默认的日志级别就是NONE，所以默认我们看不到请求日志
+
+
+在hm-api模块下新建一个配置类
+```java
+
+import feign.Logger;
+import org.springframework.context.annotation.Bean;
+
+public class DefaultFeignConfig {
+    @Bean
+    public Logger.Level feignLogLevel(){
+        return Logger.Level.FULL;
+    }
+}
+```
+
+**配置**
+
+在其他服务Module模块启动类中配置
+
+接下来，要让日志级别生效，还需要配置这个类。有两种方式：
+- 局部生效：在某个FeignClient中配置，只对当前FeignClient生效
+
+```java
+@FeignClient(value = "item-service", configuration = DefaultFeignConfig.class)
+```
+
+- 全局生效：在@EnableFeignClients中配置，针对所有FeignClient生效。
+```java
+@EnableFeignClients(defaultConfiguration = DefaultFeignConfig.class)
+```
+
+
+日志格式：
+```java
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] <--- HTTP/1.1 200  (1280ms)
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] connection: keep-alive
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] content-type: application/json
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] date: Fri, 09 May 2025 14:18:52 GMT
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] keep-alive: timeout=60
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] transfer-encoding: chunked
+22:18:52:730 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] 
+22:18:52:732 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] [{"id":"100000006163","name":"巴布豆(BOBDOG)柔薄悦动婴儿拉拉裤XXL码80片(15kg以上)","price":67100,"stock":10000,"image":"https://m.360buyimg.com/mobilecms/s720x720_jfs/t23998/350/2363990466/222391/a6e9581d/5b7cba5bN0c18fb4f.jpg!q70.jpg.webp","category":"拉拉裤","brand":"巴布豆","spec":"{}","sold":11,"commentCount":33343434,"isAD":false,"status":2}]
+22:18:52:732 DEBUG 9844 --- [nio-8082-exec-1] com.hmall.api.client.ItemClient          : [ItemClient#queryItemByIds] <--- END HTTP (371-byte body)
+```
+
+### 总结
+
+- 如何利用OpenFeign实现远程调用?
+1. 引入OpeFeign和SpringCloudLoadBalancer依赖
+2. 利用@EnableFeignClients注解开启OpenFeiqn功能
+3. 编写FeignClient
+---
+- 如何配置OpenFeign的连接池?
+1. 引入http客户端依赖，例如OKHttp、HttpClient
+2. 配置yaml文件，打开OpenFeign连接池开关
+---
+- OpenFeign使用的最佳实践方式是什么?
+
+1. 由服务提供者编写独立module，将FeignClient及DTO抽取
+---
+- 如何配置OpenFeign输出日志的级别?
+1. 声明类型为Logger.Level的Bean
+2. 在@FeignClient或@EnableFeignclient注解上使用
+
+
+
