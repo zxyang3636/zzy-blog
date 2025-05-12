@@ -580,3 +580,235 @@ public class DefaultFeignConfig {
 
 
 
+## 网关路由
+
+**网关**
+
+就是网络的关口，负责请求的路由、转发、身份校验。
+
+- 网关可以做安全控制，也就是登录身份校验，校验通过才放行
+- 通过认证后，网关再根据请求判断应该访问哪个微服务，将请求转发过去
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-12_20-16-42.png)
+
+在SpringCloud当中，提供了两种网关实现方案：
+- Netflix Zuul：早期实现，目前已经淘汰
+- SpringCloudGateway：基于Spring的WebFlux技术，完全支持响应式编程，吞吐能力更强
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-12_20-18-38.png)
+
+
+### 使用步骤
+
+1. 首先，我们要在根目录下创建一个新的module，命名为hm-gateway，作为网关微服务：
+
+2. 引入依赖
+```xml
+ <dependencies>
+    <!--common-->
+    <dependency>
+        <groupId>com.heima</groupId>
+        <artifactId>hm-common</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+    <!--网关-->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-gateway</artifactId>
+    </dependency>
+    <!--nacos discovery-->
+    <dependency>
+        <groupId>com.alibaba.cloud</groupId>
+        <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+    </dependency>
+    <!--负载均衡-->
+    <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+    </dependency>
+</dependencies>
+<build>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+```
+
+
+
+3. 启动类
+
+```java
+@SpringBootApplication
+public class GatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayApplication.class, args);
+    }
+}
+```
+
+4. 配置路由
+
+接下来，在hm-gateway模块的resources目录新建一个application.yaml文件
+
+
+```yaml
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.150.101:8848
+    gateway:
+      routes:
+        - id: item # 路由规则id，自定义，唯一
+          uri: lb://item-service # 路由的目标服务，lb代表负载均衡，会从注册中心拉取服务列表
+          predicates: # 路由断言，判断当前请求是否符合当前规则，符合则路由到目标服务
+            - Path=/items/**,/search/** # 这里是以请求路径作为判断规则
+        - id: cart
+          uri: lb://cart-service
+          predicates:
+            - Path=/carts/**
+        - id: user
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**,/addresses/**
+        - id: trade
+          uri: lb://trade-service
+          predicates:
+            - Path=/orders/**
+        - id: pay
+          uri: lb://pay-service
+          predicates:
+            - Path=/pay-orders/**
+
+```
+
+
+### 路由属性
+网关路由对应的Java类型是`RouteDefinition`，其中常见的属性有
+
+四个属性含义如下：
+- `id`：路由的唯一标示
+- `predicates`：路由断言，其实就是匹配条件
+- `filters`：路由过滤条件，后面讲
+- `uri`：路由目标地址，`lb://`代表负载均衡，从注册中心获取目标微服务的实例列表，并且负载均衡选择一个访问。
+
+我们重点关注predicates，也就是路由断言。SpringCloudGateway中支持的断言类型有很多：
+
+Spring提供了12种基本的`RoutePredicateFactory`实现:
+
+|  名称  |    说明       |   示例        |
+|  ----  |---------------|    ----|
+|   After |      是某个时间点后的请求     |    - After=2037-01-20T17:42:47.789-07:00[America/Denver]    |
+|  Before  |     是某个时间点之前的请求      |    - Before=2031-04-13T15:14:47.433+08:00[Asia/Shanghai]    |
+|  Between  |    是某两个时间点之前的请求       |- Between=2037-01-20T17:42:47.789-07:00[America/Denver], 2037-01-21T17:42:47.789-07:00[America/Denver]|
+|  Cookie  |      请求必须包含某些cookie     |     - Cookie=chocolate, ch.p   |
+|  Header  |      请求必须包含某些header     |    - Header=X-Request-Id, \d+    |
+|   Host |       请求必须是访问某个host（域名）    |    - Host=**.somehost.org,**.anotherhost.org    |
+|   Method |     请求方式必须是指定方式      |     - Method=GET,POST   |
+|   Path |       请求路径必须符合指定规则     |    - Path=/red/{segment},/blue/**    |
+|  Query  |         请求参数必须包含指定参数   |     - Query=name, Jack或者- Query=name   |
+|  RemoteAddr  |    请求者的ip必须是指定范围        |    - RemoteAddr=192.168.1.1/24    |
+|  weight  |       权重处理     |        |
+
+
+
+#### 路由过滤器
+
+网关中提供了33种路由过滤器，每种过滤器都有独特的作用。
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-12_21-34-18.png)
+
+**测试1**
+在gateway中配置
+
+```yaml{13-14} yaml
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.146.131:8848
+    gateway:
+      routes:
+        - id: item-service
+          uri: lb://item-service
+          predicates:
+            - Path=/items/**,/search/**
+          filters:
+            - AddRequestHeader=truth, 123456
+```
+
+```java
+public PageDTO<ItemDTO> queryItemByPage(PageQuery query, @RequestHeader(value = "truth", required = false) String truth) {
+        System.out.println("truth" + truth);
+```
+
+
+**测试2**
+默认过滤器，对所有路由都生效
+
+```yaml{23-24}  yaml
+    gateway:
+      routes:
+        - id: item-service
+          uri: lb://item-service
+          predicates:
+            - Path=/items/**,/search/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/addresses/**,/users/**
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/carts/**
+        - id: pay-service
+          uri: lb://pay-service
+          predicates:
+            - Path=/pay-orders/**
+        - id: trade-service
+          uri: lb://trade-service
+          predicates:
+            - Path=/orders/**
+      default-filters:
+        - AddRequestHeader=truth, 123456
+```
+
+### 网关过滤器
+
+登录校验必须在请求转发到微服务之前做，否则就失去了意义。而网关的请求转发是Gateway内部代码实现的，要想在请求转发之前做登录校验，就必须了解Gateway内部工作的基本原理。
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-12_21-55-02.png)
+
+如图所示：
+1. 客户端请求进入网关后由`HandlerMapping`对请求做判断，找到与当前请求匹配的路由规则（Route），然后将请求交给`WebHandler`去处理。
+2. `WebHandler`则会加载当前路由下需要执行的过滤器链（Filter chain），然后按照顺序逐一执行过滤器（后面称为Filter）。
+3. 图中`Filter`被虚线分为左右两部分，是因为`Filter`内部的逻辑分为`pre`和`post`两部分，分别会在请求路由到微服务之前和之后被执行。
+4. 只有所有`Filter`的`pre`逻辑都依次顺序执行通过后，请求才会被路由到微服务。
+5. 微服务返回结果后，再倒序执行`Filter`的`post`逻辑。
+6. 最终把响应结果返回。
+
+最终请求转发是有一个名为`NettyRoutingFilter`的过滤器来执行的，而且这个过滤器是整个过滤器链中顺序最靠后的一个。**如果我们能够定义一个过滤器，在其中实现登录校验逻辑，并且将过滤器执行顺序定义到`NettyRoutingFilter`之前**，这就符合我们的需求了！
+
+那么，该如何实现一个网关过滤器呢？
+
+网关过滤器链中的过滤器有两种：
+- `GatewayFilter`：路由过滤器，作用范围比较灵活，可以是任意指定的路由`Route`. 
+- `GlobalFilter`：全局过滤器，作用范围是所有路由，不可配置。
+
+
+### 自定义过滤器
+无论是GatewayFilter还是GlobalFilter都支持自定义，只不过编码方式、使用方式略有差别。
+
+网关过滤器有两种，分别是:
+- `GatewayFilter`:路由过滤器，作用于任意指定的路由;默认不生效，要配置到路由后生效。
+- `GlobalFilter`:全局过滤器，作用范围是所有路由;声明后自动生效
+
+
