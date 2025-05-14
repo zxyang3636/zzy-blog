@@ -812,3 +812,446 @@ public PageDTO<ItemDTO> queryItemByPage(PageQuery query, @RequestHeader(value = 
 - `GlobalFilter`:全局过滤器，作用范围是所有路由;声明后自动生效
 
 
+
+#### GlobalFilter
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-14_20-22-25.png)
+
+`gateway`包下创建`filters`,再创建`MyGlobalFilter`
+```java
+@Component
+public class MyGlobalFilter implements GlobalFilter, Ordered {
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // 模拟登录校验
+        ServerHttpRequest exchangeRequest = exchange.getRequest();
+        HttpHeaders headers = exchangeRequest.getHeaders();
+        System.out.println("headers:" + headers);
+        // 放行
+        return chain.filter(exchange);
+    }
+
+    @Override
+    public int getOrder() {
+    // 过滤器执行顺序，值越小，优先级越高
+        return 0;
+    }
+}
+```
+
+
+### 实现登录校验
+需求:在网关中基于过滤器实现登录校验功能
+
+```java [AuthGlobalFilter.java]
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AuthGlobalFilter implements GlobalFilter, Ordered {
+
+    private final AuthProperties authProperties;
+    private final JwtTool jwtTool;
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        if (isExculed(request.getPath().toString())) {
+            return chain.filter(exchange);
+        }
+        String token = null;
+        List<String> headers = request.getHeaders().get("authorization");
+        if (headers != null && !headers.isEmpty()) {
+            token = headers.get(0);
+        }
+        Long userId = null;
+        try {
+            userId = jwtTool.parseToken(token);
+        } catch (UnauthorizedException e) {
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return response.setComplete();
+        }
+        // 传递用户信息
+        log.info("userId:{}", userId);
+
+        return chain.filter(exchange);
+    }
+
+    private boolean isExculed(String string) {
+        for (String excludePath : authProperties.getExcludePaths()) {
+            if (antPathMatcher.match(excludePath, string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+}
+```
+
+```yaml [application.yaml]
+hm:
+  jwt:
+    location: classpath:hmall.jks
+    alias: hmall
+    password: hmall123
+    tokenTTL: 30m
+  auth:
+    excludePaths:
+      - /search/**
+      - /users/login
+      - /items/**
+      - /hi
+```
+
+**utils**
+```java
+@Component
+public class JwtTool {
+    private final JWTSigner jwtSigner;
+
+    public JwtTool(KeyPair keyPair) {
+        this.jwtSigner = JWTSignerUtil.createSigner("rs256", keyPair);
+    }
+
+    /**
+     * 创建 access-token
+     *
+     * @param
+     * @return access-token
+     */
+    public String createToken(Long userId, Duration ttl) {
+        // 1.生成jws
+        return JWT.create()
+                .setPayload("user", userId)
+                .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis()))
+                .setSigner(jwtSigner)
+                .sign();
+    }
+
+    /**
+     * 解析token
+     *
+     * @param token token
+     * @return 解析刷新token得到的用户信息
+     */
+    public Long parseToken(String token) {
+        // 1.校验token是否为空
+        if (token == null) {
+            throw new UnauthorizedException("未登录");
+        }
+        // 2.校验并解析jwt
+        JWT jwt;
+        try {
+            jwt = JWT.of(token).setSigner(jwtSigner);
+        } catch (Exception e) {
+            throw new UnauthorizedException("无效的token", e);
+        }
+        // 2.校验jwt是否有效
+        if (!jwt.verify()) {
+            // 验证失败
+            throw new UnauthorizedException("无效的token");
+        }
+        // 3.校验是否过期
+        try {
+            JWTValidator.of(jwt).validateDate();
+        } catch (ValidateException e) {
+            throw new UnauthorizedException("token已经过期");
+        }
+        // 4.数据格式校验
+        Object userPayload = jwt.getPayload("user");
+        if (userPayload == null) {
+            // 数据为空
+            throw new UnauthorizedException("无效的token");
+        }
+
+        // 5.数据解析
+        try {
+           return Long.valueOf(userPayload.toString());
+        } catch (RuntimeException e) {
+            // 数据格式有误
+            throw new UnauthorizedException("无效的token");
+        }
+    }
+}
+```
+
+```java [AuthProperties.java]
+@Data
+@Component
+@ConfigurationProperties(prefix = "hm.auth")
+public class AuthProperties {
+    private List<String> includePaths;
+    private List<String> excludePaths;
+}
+```
+
+
+```java [JwtProperties.java]
+@Data
+@ConfigurationProperties(prefix = "hm.jwt")
+public class JwtProperties {
+    private Resource location;
+    private String password;
+    private String alias;
+    private Duration tokenTTL = Duration.ofMinutes(10);
+}
+```
+
+```java [SecurityConfig.java]
+@Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+public class SecurityConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public KeyPair keyPair(JwtProperties properties){
+        // 获取秘钥工厂
+        KeyStoreKeyFactory keyStoreKeyFactory =
+                new KeyStoreKeyFactory(
+                        properties.getLocation(),
+                        properties.getPassword().toCharArray());
+        //读取钥匙对
+        return keyStoreKeyFactory.getKeyPair(
+                properties.getAlias(),
+                properties.getPassword().toCharArray());
+    }
+}
+```
+
+
+具体作用如下：
+- `AuthProperties`：配置登录校验需要拦截的路径，因为不是所有的路径都需要登录才能访问
+- `JwtProperties`：定义与JWT工具有关的属性，比如秘钥文件位置
+- `SecurityConfig`：工具的自动装配
+- `JwtTool`：JWT工具，其中包含了校验和解析token的功能
+- `hmall.jks`：秘钥文件
+
+:::info
+`@ConfigurationProperties(prefix = "hm.auth")` 是 Spring Boot 提供的一个注解，用于将配置文件（如 `application.properties` 或 `application.yml`）中的属性值绑定到 Java 对象中。
+<br>
+<br>
+
+`AntPathMatcher` 是 Spring 框架提供的一个工具类，用于匹配路径模式（`Path Patterns`）。在权限控制中验证用户是否有权访问某个路径。
+:::
+
+```java
+antPathMatcher.match("/user/*.json", "/user/profile.json"); // true
+antPathMatcher.match("/**/*.html", "/pages/home/index.html"); // true
+```
+
+
+### 网关传递用户
+
+1. 我们修改登录校验拦截器的处理逻辑，保存用户信息到请求头中：
+```java
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AuthGlobalFilter implements GlobalFilter, Ordered {
+
+    private final AuthProperties authProperties;
+    private final JwtTool jwtTool;
+    private final AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        if (isExculed(request.getPath().toString())) {
+            return chain.filter(exchange);
+        }
+        String token = null;
+        List<String> headers = request.getHeaders().get("authorization");
+        if (headers != null && !headers.isEmpty()) {
+            token = headers.get(0);
+        }
+        Long userId = null;
+        try {
+            userId = jwtTool.parseToken(token);
+        } catch (UnauthorizedException e) {
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return response.setComplete();
+        }
+        // 传递用户信息
+        String userInfo = userId.toString();
+        ServerWebExchange serverWebExchange = exchange.mutate()  // mutate就是对下游请求做更改
+                .request(builder -> builder.header("user-info", userInfo))
+                .build();
+        log.info("userId:{}", userId);
+
+        return chain.filter(serverWebExchange);
+    }
+
+    private boolean isExculed(String string) {
+        for (String excludePath : authProperties.getExcludePaths()) {
+            if (antPathMatcher.match(excludePath, string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
+    }
+}
+```
+
+2. 在hm-common中编写`SpringMVC`拦截器，获取登录用户
+
+需求:由于每个微服务都可能有获取登录用户的需求，因此我们直接在hm-common模块定义拦截器
+这样微服务只需要引入依赖即可生效，无需重复编写。
+
+```java [UserInfoInterceptor.java]
+public class UserInfoInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 获取登录用户信息
+        String userInfo = request.getHeader("user-info");
+        // 是否获取了用户，如果有存入ThreadLocal
+        if (StrUtil.isNotBlank(userInfo)) {
+            UserContext.setUser(Long.valueOf(userInfo));
+        }
+        // 放行
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        UserContext.removeUser();
+    }
+}
+```
+
+```java [MvcConfig.java]
+@Configuration
+@ConditionalOnClass(DispatcherServlet.class)
+public class MvcConfig implements WebMvcConfigurer {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new UserInfoInterceptor());
+    }
+}
+```
+
+不过，需要注意的是，这个配置类默认是不会生效的，因为它所在的包是`com.hmall.common.config`，与其它微服务的扫描包不一致，无法被扫描到，因此无法生效。
+基于`SpringBoot`的自动装配原理，我们要将其添加到`resources`目录下的`META-INF/spring.factories`文件中：
+
+common的`resources`下的`META-INF`
+```factories [spring.factories]
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.hmall.common.config.MyBatisConfig,\
+  com.hmall.common.config.JsonConfig,\
+  com.hmall.common.config.MvcConfig
+```
+
+`common`的`utils`包下的`UserContext`
+```java [UserContext.java]
+public class UserContext {
+    private static final ThreadLocal<Long> tl = new ThreadLocal<>();
+
+    /**
+     * 保存当前登录用户信息到ThreadLocal
+     * @param userId 用户id
+     */
+    public static void setUser(Long userId) {
+        tl.set(userId);
+    }
+
+    /**
+     * 获取当前登录用户信息
+     * @return 用户id
+     */
+    public static Long getUser() {
+        return tl.get();
+    }
+
+    /**
+     * 移除当前登录用户信息
+     */
+    public static void removeUser(){
+        tl.remove();
+    }
+}
+```
+
+:::tip
+`@ConditionalOnClass` 的作用是检查类路径中是否存在指定的类。如果存在，则加载被标注的配置或组件；否则，忽略该配置。
+
+在微服务或多模块项目中，可以根据运行时的类路径动态加载不同的配置。我们希望他在网关中不要加载，因为网关是基于`WebFlux`加载会报错
+:::
+
+
+### OpenFeign传递用户
+微服务之间传递用户信息
+
+前端发起的请求都会经过网关再到微服务，由于我们之前编写的过滤器和拦截器功能，微服务可以轻松获取登录用户信息。
+
+但有些业务是比较复杂的，请求到达微服务后还需要调用其它多个微服务。比如下单业务，流程如下：
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-14_21-52-23.png)
+
+下单的过程中，需要调用商品服务扣减库存，调用购物车服务清理用户购物车。而清理购物车时必须知道当前登录的用户身份。但是，**订单服务调用购物车时并没有传递用户信息**，购物车服务无法知道当前用户是谁！
+
+由于微服务获取用户信息是通过拦截器在请求头中读取，因此要想实现微服务之间的用户信息传递，就**必须在微服务发起调用时把用户信息存入请求头**。
+
+
+
+OpenFeign中提供了一个拦截器接口，所有由OpenFeign发起的请求都会先调用拦截器处理请求：
+
+由于FeignClient全部都是在hm-api模块，因此我们在hm-api模块的com.hmall.api.config.DefaultFeignConfig中编写这个拦截器：
+
+
+在hm-api中的config的`DefaultFeignConfig`中
+```java
+public class DefaultFeignConfig {
+    @Bean
+    public Logger.Level feignLogLevel() {
+        return Logger.Level.FULL;
+    }
+
+    @Bean
+    public RequestInterceptor userInfoRequestInterceptor() {
+        return new RequestInterceptor() {
+            @Override
+            public void apply(RequestTemplate requestTemplate) {
+                Long userId = UserContext.getUser();
+                if (userId != null) {
+                    requestTemplate.header("user-info", userId.toString());
+                }
+            }
+        };
+    }
+}
+```
+
+启动类上配置
+```java
+@EnableFeignClients(basePackages = "com.hmall.api.client", defaultConfiguration = DefaultFeignConfig.class)
+public class TradeApplication {}
+```
+
+好了，现在微服务之间通过OpenFeign调用时也会传递登录用户信息了。
+
+
+
+
+
+
+
+
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-14_22-07-04.png)
+
+
