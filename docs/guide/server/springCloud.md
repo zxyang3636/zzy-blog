@@ -1150,7 +1150,7 @@ public class MvcConfig implements WebMvcConfigurer {
 基于`SpringBoot`的自动装配原理，我们要将其添加到`resources`目录下的`META-INF/spring.factories`文件中：
 
 common的`resources`下的`META-INF`
-```factories [spring.factories]
+``` [spring.factories]
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   com.hmall.common.config.MyBatisConfig,\
   com.hmall.common.config.JsonConfig,\
@@ -1254,4 +1254,353 @@ public class TradeApplication {}
 
 ![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-14_22-07-04.png)
 
+
+
+
+## 配置管理
+
+- 微服务重复配置过多，维护成本高
+- 业务配置经常变动，每次修改都要重启服务
+- 网关路由配置写死，如果变更要重启网关
+
+### 配置共享
+
+
+1. 添加配置到`Nacos`
+
+添加一些共享配置到`Nacos`中，包括:`Jdbc`、`MybatisPlus`、日志、`Swagger`、`OpenFeign`等配置
+
+```yaml [shared-jdbc.yaml]
+spring:
+  datasource:
+    url: jdbc:mysql://${hm.db.host}:${hm.db.port:3306}/${hm.db.database}?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${hm.db.un:root}
+    password: ${hm.db.pw:123}
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      update-strategy: not_null
+      id-type: auto
+```
+
+```yaml [shared-log.yaml]
+logging:
+  level:
+    com.hmall: debug
+  pattern:
+    dateformat: HH:mm:ss:SSS
+  file:
+    path: "logs/${spring.application.name}"
+```
+
+```yaml [shared-swagger.yaml]
+knife4j:
+  enable: true
+  openapi:
+    title: ${hm.swagger.title:黑马商城接口文档}
+    description: ${hm.swagger.desc:黑马商城接口文档}
+    email: zxyang3636@163.com
+    concat: zzyang
+    url: https://www.zzyang.top
+    version: v1.0.0
+    group:
+      default:
+        group-name: default
+        api-rule: package
+        api-rule-resources:  # Swagger扫描到Controller，会把Controller接口信息作为接口文档信息
+          - ${hm.swagger.package}
+```
+
+2. 拉取共享配置
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-15_19-56-07.png)
+
+读取Nacos配置是SpringCloud上下文（ApplicationContext）初始化时处理的，发生在项目的引导阶段。然后才会初始化SpringBoot上下文，去读取application.yaml。
+也就是说引导阶段，application.yaml文件尚未读取，根本不知道nacos 地址，该如何去加载nacos中的配置文件呢？
+
+SpringCloud在初始化上下文的时候会先读取一个名为bootstrap.yaml(或者bootstrap.properties)的文件，如果我们将nacos地址配置到bootstrap.yaml中，那么在项目引导阶段就可以读取nacos中的配置了。
+
+**引入依赖**
+
+```xml
+  <!--nacos配置管理-->
+  <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+  </dependency>
+  <!--读取bootstrap文件-->
+  <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-bootstrap</artifactId>
+  </dependency>
+```
+
+新建`bootstrap.yaml`
+
+在cart-service中的resources目录新建一个bootstrap.yaml文件：
+
+*内容如下：*
+```yaml
+spring:
+  application:
+    name: cart-service # 服务名称
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 192.168.146.131:8848 # nacos地址
+      config:
+        file-extension: yaml # 文件后缀名
+        shared-configs: # 共享配置
+          - dataId: shared-jdbc.yaml # 共享mybatis配置
+          - dataId: shared-log.yaml # 共享日志配置
+          - dataId: shared-swagger.yaml # 共享日志配置
+```
+
+
+修改`application.yaml`
+
+```yaml
+server:
+  port: 8082
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp连接池支持
+hm:
+  swagger:
+    title: 购物车服务接口文档
+    package: com.hmall.cart.controller
+  db:
+    database: hm-cart
+```
+
+重启服务，发现所有配置都生效了。
+
+### 配置热更新
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/wechat_2025-05-15_202238_944.png)
+
+1. 新建配置文件
+```java [CartProperties.java]
+@Data
+@Component
+@ConfigurationProperties(prefix = "hm.cart")
+public class CartProperties {
+    private Integer maxItems;
+}
+```
+
+**注入**
+```java
+@Service
+@RequiredArgsConstructor
+public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements ICartService {}
+
+private final CartProperties cartProperties;
+
+```
+
+**改造代码**
+```java
+  private void checkCartsFull(Long userId) {
+        int count = lambdaQuery().eq(Cart::getUserId, userId).count().intValue();
+        if (count >= cartProperties.getMaxItems()) {
+            throw new BizIllegalException(StrUtil.format("用户购物车课程不能超过{}", cartProperties.getMaxItems()));
+        }
+    }
+
+```
+
+2. nacos中创建
+
+注意文件的dataId格式：
+```
+[服务名]-[spring.active.profile].[后缀名]
+```
+
+文件名称由三部分组成：
+- 服务名：我们是购物车服务，所以是cart-service
+- spring.active.profile：就是spring boot中的spring.active.profile，可以省略，则所有profile共享该配置
+- 后缀名：例如yaml
+
+我们直接使用`cart-service.yaml`这个名称，则不管是dev还是local环境都可以共享该配置。
+
+```yaml [cart-service.yaml]
+hm:
+  cart:
+    maxItems: 1 # 购物车商品数量上限
+```
+
+后续修改`maxItems`，无需重启服务，配置热更新就生效了！
+
+### 动态路由
+
+监听Nacos配置变更可以参考官方文档： https://nacos.io/zh-cn/docs/sdk.html
+
+
+1. 网关中引入依赖
+```xml
+ <!--nacos配置管理-->
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+<!--读取bootstrap文件-->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-bootstrap</artifactId>
+</dependency>
+```
+
+
+网关的bootstrap.yaml文件
+```yaml [bootstrap.yaml]
+spring:
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 192.168.146.131:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: shared-log.yaml
+  profiles:
+    active: dev
+```
+
+```yaml [application.yaml]
+server:
+  port: 8080
+
+hm:
+  jwt:
+    location: classpath:hmall.jks
+    alias: hmall
+    password: hmall123
+    tokenTTL: 30m
+  auth:
+    excludePaths:
+      - /search/**
+      - /users/login
+      - /items/**
+      - /hi
+```
+
+网关中，新建`routers/DynamicRouteLoader.java`
+
+```java
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class DynamicRouteLoader {
+
+    private final NacosConfigManager nacosConfigManager;
+    private final RouteDefinitionWriter writer;
+
+    private final String dataId = "gateway-routes.json";
+    private final String group = "DEFAULT_GROUP";
+
+    private final Set<String> routeIds = new HashSet<>();
+
+    @PostConstruct
+    public void initRouteConfigListener() throws NacosException {
+        // 项目启动时，先拉取一次配置，并添加配置监听器
+        String configInfo = nacosConfigManager.getConfigService()
+                .getConfigAndSignListener(dataId, group, 5000, new Listener() {
+                    @Override
+                    public Executor getExecutor() {
+                        return null;
+                    }
+
+                    @Override
+                    public void receiveConfigInfo(String configInfo) {
+                        // 2.监听到配置变更，更新路由表
+                        updateConfigInfo(configInfo);
+                    }
+                });
+        // 3.第一次读取到配置，也需要更新到路由表
+        updateConfigInfo(configInfo);
+    }
+
+    public void updateConfigInfo(String configInfo) {
+        log.debug("监听到路由配置信息：{}", configInfo);
+        // 1.解析配置信息，转为RouteDefinition
+        List<RouteDefinition> routeDefinitionList = JSONUtil.toList(configInfo, RouteDefinition.class);
+        // 删除旧的路由表
+        for (String routeId : routeIds) {
+            writer.delete(Mono.just(routeId));
+        }
+        routeIds.clear();
+        // 2.更新路由表
+        for (RouteDefinition routeDefinition : routeDefinitionList) {
+            // 更新路由表
+            writer.save(Mono.just(routeDefinition)).subscribe();
+            // 记录路由id，便于下一次更新时删除
+            routeIds.add(routeDefinition.getId());
+        }
+    }
+}
+```
+
+
+
+nacos配置
+
+![](https://zzyang.oss-cn-hangzhou.aliyuncs.com/img/Snipaste_2025-05-15_22-16-38.png)
+
+`gateway-routes.json`
+
+```json
+[
+    {
+        "id": "item",
+        "predicates": [{
+            "name": "Path",
+            "args": {"_genkey_0":"/items/**", "_genkey_1":"/search/**"}
+        }],
+        "filters": [],
+        "uri": "lb://item-service"
+    },
+    {
+        "id": "cart",
+        "predicates": [{
+            "name": "Path",
+            "args": {"_genkey_0":"/carts/**"}
+        }],
+        "filters": [],
+        "uri": "lb://cart-service"
+    },
+    {
+        "id": "user",
+        "predicates": [{
+            "name": "Path",
+            "args": {"_genkey_0":"/users/**", "_genkey_1":"/addresses/**"}
+        }],
+        "filters": [],
+        "uri": "lb://user-service"
+    },
+    {
+        "id": "trade",
+        "predicates": [{
+            "name": "Path",
+            "args": {"_genkey_0":"/orders/**"}
+        }],
+        "filters": [],
+        "uri": "lb://trade-service"
+    },
+    {
+        "id": "pay",
+        "predicates": [{
+            "name": "Path",
+            "args": {"_genkey_0":"/pay-orders/**"}
+        }],
+        "filters": [],
+        "uri": "lb://pay-service"
+    }
+]
+```
 
