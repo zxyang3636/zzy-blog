@@ -29,8 +29,8 @@ export default {
     if (frontmatter.value?.layoutClass) {
       props.class = frontmatter.value.layoutClass;
     }
-
-    return h(MyLayout, props);
+    // return h(MyLayout, props); // 主题过渡动画
+    return h(DefaultTheme.Layout, props);
   },
   enhanceApp({ app, router }) {
     // 注册全局组件

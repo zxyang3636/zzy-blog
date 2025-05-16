@@ -7,6 +7,7 @@ import {
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  base: '/',
   lastUpdated: true, //首次配置不会立即生效，需git提交后爬取时间戳
   markdown: {
     config(md) {
@@ -24,9 +25,9 @@ export default defineConfig({
     ],
   },
   // 站点地图
-  sitemap: {
-    hostname: "https://www.zzyang.top",
-  },
+  // sitemap: {
+  //   hostname: "https://www.zzyang.top",
+  // },
   cleanUrls: true, //开启纯净链接
   lang: "zh-CN", //语言，可选 en-US
   title: "zzy-blog",
@@ -60,7 +61,7 @@ export default defineConfig({
         timeStyle: "medium", // 可选值full、long、medium、short
       },
     },
-    logo: "./logo.png", // 左上角logo
+    logo: "/logo.png", // 左上角logo
     //本地搜索
     search: {
       provider: "local",
